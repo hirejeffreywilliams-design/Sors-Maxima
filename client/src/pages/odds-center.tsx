@@ -1832,7 +1832,7 @@ export default function OddsCenter() {
   const lastUpdated = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString() : null;
 
   return (
-    <div className="p-4 md:p-6 space-y-4 max-w-7xl mx-auto" data-testid="odds-center-page">
+    <div className="p-4 sm:p-6 space-y-4 max-w-7xl mx-auto" data-testid="odds-center-page">
       <PageHero
         title="Odds Center"
         subtitle={`Live odds, line movement, EV analysis, and bookmaker comparison — all in one place.${lastUpdated ? ` Updated ${lastUpdated}` : ""}`}

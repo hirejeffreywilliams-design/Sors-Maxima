@@ -733,7 +733,7 @@ function DesktopNav({ authState }: { authState: AuthState }) {
   );
 
   return (
-    <nav className="hidden lg:flex items-center gap-0.5">
+    <nav className="hidden items-center gap-0.5">
       <NavBtn href="/" icon={Zap} label="Picks" testId="nav-command-center" tooltip="Command Center — all engines live" />
       <NavBtn href="/daily" icon={Calendar} label="Daily" testId="nav-daily" tooltip="Today's top picks" />
       <NavBtn href="/cards" icon={Trophy} label="Cards" testId="nav-cards" tooltip="Sors Intelligence Cards — collect, trade & showcase" />
@@ -821,7 +821,7 @@ function BottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
 
   return (
     <>
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 backdrop-blur-xl bg-background/80 safe-area-bottom">
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-border/40 backdrop-blur-xl bg-background/80 safe-area-bottom">
         <div className="flex items-center justify-around gap-0 h-16">
           {selectedItems.map((item) => {
             const Icon = NAV_ICON_MAP[item.iconName] || Zap;
@@ -924,7 +924,7 @@ function UserMenu({ authState, onLogout }: { authState: AuthState; onLogout: () 
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <button
-          className="hidden lg:flex items-center gap-1.5 rounded-md px-2 py-1.5 hover:bg-muted transition-colors"
+          className="hidden sm:flex items-center gap-1.5 rounded-md px-2 py-1.5 hover:bg-muted transition-colors"
           data-testid="button-user-menu"
           aria-label="Account menu"
         >
@@ -1018,11 +1018,11 @@ function EmailVerificationBanner({ authState }: { authState: AuthState }) {
   );
 }
 
-function TabletSidebarItem({ href, icon: Icon, label, isActive, collapsed, testId }: { href: string; icon: React.ComponentType<{className?:string}>; label: string; isActive: boolean; collapsed: boolean; testId: string }) {
+function SidebarNavItem({ href, icon: Icon, label, isActive, collapsed, testId, color }: { href: string; icon: React.ComponentType<{className?:string}>; label: string; isActive: boolean; collapsed: boolean; testId: string; color?: string }) {
   return (
     <Link href={href}>
       <div
-        className={`flex items-center gap-3 mx-2 px-2 py-2 rounded-lg transition-colors text-sm ${isActive ? "bg-primary/10 text-primary font-medium" : "text-muted-foreground hover:bg-muted hover:text-foreground"}`}
+        className={`flex items-center gap-3 mx-2 px-2 py-2 rounded-lg transition-colors min-h-[36px] ${isActive ? "bg-primary/10 text-primary font-medium" : `text-muted-foreground hover:bg-muted hover:text-foreground ${color || ""}`}`}
         data-testid={testId}
         title={collapsed ? label : undefined}
       >
@@ -1033,58 +1033,82 @@ function TabletSidebarItem({ href, icon: Icon, label, isActive, collapsed, testI
   );
 }
 
-const TABLET_NAV_ITEMS: { href: string; icon: React.ComponentType<{className?:string}>; label: string; testId: string; section: string }[] = [
-  { href: "/", icon: Zap, label: "Command Center", testId: "tablet-nav-command", section: "Picks" },
-  { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "tablet-nav-daily", section: "Picks" },
-  { href: "/cards", icon: Trophy, label: "Intelligence Cards", testId: "tablet-nav-cards", section: "Picks" },
-  { href: "/generate", icon: Ticket, label: "Smart Generator", testId: "tablet-nav-generate", section: "Tickets" },
-  { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "tablet-nav-builder", section: "Tickets" },
-  { href: "/pick-review", icon: ClipboardList, label: "Pick Review", testId: "tablet-nav-review", section: "Tickets" },
-  { href: "/my-bets", icon: ReceiptText, label: "My Bets", testId: "tablet-nav-bets", section: "Tickets" },
-  { href: "/odds-center", icon: TrendingUp, label: "Odds Center", testId: "tablet-nav-odds", section: "Markets" },
-  { href: "/player-props", icon: Star, label: "Player Props", testId: "tablet-nav-props", section: "Markets" },
-  { href: "/ai-analyst", icon: Brain, label: "AI Analyst", testId: "tablet-nav-ai", section: "Discover" },
-  { href: "/track-record", icon: BarChart2, label: "Track Record", testId: "tablet-nav-track", section: "Discover" },
-  { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "tablet-nav-bankroll", section: "Account" },
-  { href: "/profile", icon: User, label: "My Profile", testId: "tablet-nav-profile", section: "Account" },
+type NavDef = { href: string; icon: React.ComponentType<{className?:string}>; label: string; testId: string; section: string; color?: string };
+
+const APP_NAV_ITEMS: NavDef[] = [
+  { href: "/", icon: Zap, label: "Command Center", testId: "sidebar-nav-command", section: "Picks" },
+  { href: "/daily", icon: Calendar, label: "Daily Picks", testId: "sidebar-nav-daily", section: "Picks" },
+  { href: "/cards", icon: Trophy, label: "Intelligence Cards", testId: "sidebar-nav-cards", section: "Picks" },
+  { href: "/generate", icon: Ticket, label: "Smart Generator", testId: "sidebar-nav-generate", section: "Tickets" },
+  { href: "/builder", icon: LayoutGrid, label: "Parlay Builder", testId: "sidebar-nav-builder", section: "Tickets" },
+  { href: "/pick-review", icon: ClipboardList, label: "Pick Review", testId: "sidebar-nav-review", section: "Tickets" },
+  { href: "/my-bets", icon: ReceiptText, label: "My Bets", testId: "sidebar-nav-bets", section: "Tickets" },
+  { href: "/strategy", icon: Compass, label: "Strategy Advisor", testId: "sidebar-nav-strategy", section: "Tickets" },
+  { href: "/odds-center", icon: TrendingUp, label: "Odds Center", testId: "sidebar-nav-odds", section: "Markets" },
+  { href: "/player-props", icon: Star, label: "Player Props", testId: "sidebar-nav-props", section: "Markets" },
+  { href: "/live", icon: Activity, label: "Live Scores", testId: "sidebar-nav-live", section: "Markets" },
+  { href: "/ai-analyst", icon: Brain, label: "AI Analyst", testId: "sidebar-nav-ai", section: "Discover" },
+  { href: "/track-record", icon: BarChart2, label: "Track Record", testId: "sidebar-nav-track", section: "Discover" },
+  { href: "/tools", icon: Wrench, label: "Analysis & Tools", testId: "sidebar-nav-tools", section: "Discover" },
+  { href: "/community", icon: Users, label: "Community", testId: "sidebar-nav-community", section: "Discover" },
+  { href: "/bankroll", icon: Wallet, label: "Bankroll", testId: "sidebar-nav-bankroll", section: "Account" },
+  { href: "/profile", icon: User, label: "My Profile", testId: "sidebar-nav-profile", section: "Account" },
+  { href: "/settings", icon: SettingsIcon, label: "Settings", testId: "sidebar-nav-settings", section: "Account" },
 ];
 
-function TabletSidebar({ authState, collapsed, onToggle, onLogout }: { authState: AuthState; collapsed: boolean; onToggle: () => void; onLogout: () => void }) {
-  const [location] = useLocation();
+const ADMIN_NAV_ITEMS: NavDef[] = [
+  { href: "/admin", icon: Shield, label: "Admin Center", testId: "sidebar-nav-admin", section: "Admin", color: "text-purple-500" },
+  { href: "/admin/cards", icon: Trophy, label: "Cards Vault", testId: "sidebar-nav-admin-cards", section: "Admin", color: "text-amber-400" },
+];
 
-  const sections = Array.from(new Set(TABLET_NAV_ITEMS.map(i => i.section)));
+function AppSidebar({ authState, collapsed, onToggle }: { authState: AuthState; collapsed: boolean; onToggle: () => void }) {
+  const [location] = useLocation();
+  const sections = Array.from(new Set(APP_NAV_ITEMS.map(i => i.section)));
 
   return (
     <aside
-      className={`hidden md:flex lg:hidden flex-col fixed left-0 top-14 bottom-0 z-40 border-r border-border/60 bg-background/95 backdrop-blur-sm transition-all duration-200 ${collapsed ? "w-14" : "w-52"}`}
-      data-testid="tablet-sidebar"
+      className={`hidden sm:flex flex-col fixed left-0 top-14 bottom-0 z-40 border-r border-border/60 bg-background/95 backdrop-blur-sm transition-all duration-200 ${collapsed ? "w-14" : "w-52 lg:w-56"}`}
+      data-testid="app-sidebar"
+      aria-label="Main navigation"
     >
-      <div className="flex-1 overflow-y-auto py-2 space-y-3">
+      <div className="flex-1 overflow-y-auto py-2">
+        {authState.isAdmin && !collapsed && (
+          <div>
+            <div className="px-4 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-purple-500">Admin</div>
+            {ADMIN_NAV_ITEMS.map(item => (
+              <SidebarNavItem key={item.href} href={item.href} icon={item.icon} label={item.label} isActive={location === item.href} collapsed={false} testId={item.testId} color={item.color} />
+            ))}
+          </div>
+        )}
+        {authState.isAdmin && collapsed && ADMIN_NAV_ITEMS.map(item => (
+          <SidebarNavItem key={item.href} href={item.href} icon={item.icon} label={item.label} isActive={location === item.href} collapsed={true} testId={item.testId} color={item.color} />
+        ))}
         {!collapsed && sections.map(section => (
           <div key={section}>
-            <div className="px-4 pt-2 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{section}</div>
-            {TABLET_NAV_ITEMS.filter(i => i.section === section).map(item => (
-              <TabletSidebarItem key={item.href} href={item.href} icon={item.icon} label={item.label} isActive={location === item.href} collapsed={false} testId={item.testId} />
+            <div className="px-4 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{section}</div>
+            {APP_NAV_ITEMS.filter(i => i.section === section).map(item => (
+              <SidebarNavItem key={item.href} href={item.href} icon={item.icon} label={item.label} isActive={location === item.href} collapsed={false} testId={item.testId} />
             ))}
           </div>
         ))}
-        {collapsed && TABLET_NAV_ITEMS.map(item => (
-          <TabletSidebarItem key={item.href} href={item.href} icon={item.icon} label={item.label} isActive={location === item.href} collapsed={true} testId={item.testId} />
+        {collapsed && APP_NAV_ITEMS.map(item => (
+          <SidebarNavItem key={item.href} href={item.href} icon={item.icon} label={item.label} isActive={location === item.href} collapsed={true} testId={item.testId} />
         ))}
       </div>
       <div className="border-t border-border/40 p-2">
         {!collapsed && authState.username && (
-          <div className="flex items-center gap-2 px-2 py-1.5 mb-1 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2 px-2 py-1.5 mb-1">
             <div className="w-6 h-6 rounded-full bg-primary/15 flex items-center justify-center text-[10px] font-bold text-primary shrink-0">
               {authState.username.charAt(0).toUpperCase()}
             </div>
-            <span className="truncate">{authState.username}</span>
+            <span className="truncate text-xs text-muted-foreground">{authState.username}</span>
+            {authState.isAdmin && <Badge variant="secondary" className="text-[10px] py-0 px-1 ml-auto shrink-0">Admin</Badge>}
           </div>
         )}
         <button
           onClick={onToggle}
-          className="w-full flex items-center justify-center gap-2 px-2 py-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors text-xs"
-          data-testid="button-tablet-sidebar-toggle"
+          className="w-full flex items-center justify-center gap-2 px-2 py-2 rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground transition-colors text-xs min-h-[36px]"
+          data-testid="button-sidebar-toggle"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : <><ChevronLeft className="w-4 h-4" /><span>Collapse</span></>}
@@ -1133,7 +1157,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
             
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden" data-testid="button-mobile-menu">
+                <Button variant="ghost" size="icon" className="sm:hidden" data-testid="button-mobile-menu">
                   <Menu className="w-5 h-5" />
                 </Button>
               </SheetTrigger>
@@ -1155,7 +1179,7 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
         </div>
       </header>
 
-      <TabletSidebar
+      <AppSidebar
         authState={authState}
         collapsed={tabletSidebarCollapsed}
         onToggle={() => {
@@ -1163,11 +1187,10 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
           setTabletSidebarCollapsed(next);
           localStorage.setItem("tablet-sidebar-collapsed", String(next));
         }}
-        onLogout={handleLogout}
       />
 
       <ParlaySlipProvider username={authState.username} canUseMultiSlip={authState.isAdmin || ["elite", "whale"].includes(authState.tier ?? "")}>
-        <div className={`transition-all duration-200 ${tabletSidebarCollapsed ? "md:pl-14 lg:pl-0" : "md:pl-52 lg:pl-0"}`}>
+        <div className={`transition-all duration-200 ${tabletSidebarCollapsed ? "sm:pl-14" : "sm:pl-52 lg:pl-56"}`}>
         <div className="sticky top-14 z-40 w-full">
           <OfflineBanner />
           <SportsTicker />
@@ -1180,11 +1203,11 @@ function AuthenticatedApp({ onLogout, authState }: { onLogout: () => void; authS
           <EmailVerificationBanner authState={authState} />
         </div>
 
-        <main className="min-h-[calc(100vh-3.5rem)] pb-20 md:pb-0">
+        <main className="min-h-[calc(100vh-3.5rem)] pb-20 sm:pb-0">
           <Router authState={authState} />
         </main>
 
-        <footer className="border-t bg-muted/30 py-4 px-4 lg:px-6 mb-16 md:mb-0">
+        <footer className="border-t bg-muted/30 py-4 px-4 lg:px-6 mb-16 sm:mb-0">
           <div className="max-w-screen-2xl mx-auto">
             <div className="flex flex-col items-center gap-3 text-xs text-muted-foreground">
               <div className="text-center max-w-2xl space-y-1">
