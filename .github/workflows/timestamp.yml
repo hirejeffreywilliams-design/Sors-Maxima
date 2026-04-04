@@ -1,0 +1,82 @@
+name: 🔒 Cryptographic Timestamp - Sors Maxima
+# Generates SHA-256 hashes and OpenTimestamps proofs on every push to main
+# and on the 1st of every month for continuous evidence chain
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 0 1 * *'  # Monthly on the 1st at midnight UTC
+
+permissions:
+  contents: read
+
+jobs:
+  timestamp:
+    name: Generate Cryptographic Timestamp Proof
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for accurate metadata
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install OpenTimestamps
+        run: pip install opentimestamps-client
+
+      - name: Generate repository metadata
+        run: |
+          echo "=== SORS MAXIMA TIMESTAMP CERTIFICATE ===" > timestamp-metadata.txt
+          echo "Date: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> timestamp-metadata.txt
+          echo "Repository: Sors-Maxima" >> timestamp-metadata.txt
+          echo "Owner: Jeffrey W Williams LLC" >> timestamp-metadata.txt
+          echo "Commit: $(git rev-parse HEAD)" >> timestamp-metadata.txt
+          echo "Commit Date: $(git log -1 --format='%ai')" >> timestamp-metadata.txt
+          echo "Commit Message: $(git log -1 --format='%s')" >> timestamp-metadata.txt
+          echo "" >> timestamp-metadata.txt
+          echo "=== FILE STATISTICS ===" >> timestamp-metadata.txt
+          echo "Source files (TS/TSX/JS/JSX): $(find . -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' \) ! -path '*/node_modules/*' ! -path '*/.git/*' | wc -l)" >> timestamp-metadata.txt
+          echo "Source lines: $(find . -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' \) ! -path '*/node_modules/*' ! -path '*/.git/*' -exec cat {} + | wc -l)" >> timestamp-metadata.txt
+          echo "Total authored files: $(find . -type f ! -path '*/node_modules/*' ! -path '*/.git/*' ! -name 'package-lock.json' | wc -l)" >> timestamp-metadata.txt
+
+      - name: Create source code archive
+        run: |
+          tar -czf repo-snapshot.tar.gz \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='package-lock.json' \
+            .
+
+      - name: Generate SHA-256 hashes
+        run: |
+          echo "=== REPOSITORY ARCHIVE HASH ===" > sha256-hashes.txt
+          sha256sum repo-snapshot.tar.gz >> sha256-hashes.txt
+          echo "" >> sha256-hashes.txt
+          echo "=== INDIVIDUAL SOURCE FILE HASHES ===" >> sha256-hashes.txt
+          find . -type f \( -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' \) \
+            ! -path '*/node_modules/*' ! -path '*/.git/*' \
+            -exec sha256sum {} + >> sha256-hashes.txt
+          echo "" >> sha256-hashes.txt
+          echo "=== COMBINED HASH ===" >> sha256-hashes.txt
+          cat sha256-hashes.txt | sha256sum >> sha256-hashes.txt
+
+      - name: Create OpenTimestamps proof
+        run: |
+          ots stamp sha256-hashes.txt
+          ots stamp timestamp-metadata.txt
+
+      - name: Upload timestamp artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: timestamp-proof-${{ github.sha }}-$(date +%Y%m%d)
+          path: |
+            timestamp-metadata.txt
+            sha256-hashes.txt
+            sha256-hashes.txt.ots
+            timestamp-metadata.txt.ots
+          retention-days: 365
