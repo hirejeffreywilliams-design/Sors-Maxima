@@ -1,41 +1,79 @@
-node_modules
-dist
+# Environment & Secrets
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+.env.test
+.env.*
+*.pem
+*.key
+*.cert
+*.p12
+*.pfx
+secrets.json
+config.secret.*
+credentials.json
+service-account.json
+google-credentials.json
+
+# API Keys & Tokens
+token.txt
+tokens.json
+api_keys.*
+*.token
+.replit-token
+.github-token
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+*.tsbuildinfo
+
+# IDE & OS
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
 .DS_Store
-server/public
-vite.config.ts.*
-*.tar.gz
-# Runtime cache/state files
-accelerated-pattern-cache.json
-api-budget-state.json
-market-snapshot-disk-cache.json
-odds-api-disk-cache.json
-platform-intelligence-data.json
-.usml-state.json
-precomputed-picks-cache.json
+Thumbs.db
 
-# Runtime state & cache files (auto-generated, should not be tracked)
-.usml-state.json
-accelerated-pattern-cache.json
-api-budget-state.json
-community-patterns.json
-market-snapshot-disk-cache.json
-monte-carlo-learning-data.json
-odds-api-disk-cache.json
-pipeline-alerts.json
-platform-intelligence-data.json
-precomputed-picks-cache.json
-pick-outcomes-data.json
-team-form-cache.json
+# Database
+*.sqlite
+*.sqlite3
+*.db
+*.sql.gz
+database.json
 
-# Runtime state files (transient, not source-controlled)
-autonomous-admin-state.json
-community-patterns.json
-monte-carlo-learning-data.json
-pick-outcomes-data.json
-pipeline-alerts.json
-team-form-cache.json
+# Logs
+logs/
+*.log
 
-# Transient runtime state
-app-intelligence-state.json
-autonomous-learning-log.json
-mc-stacked-learner.json
+# Coverage & Testing
+coverage/
+.nyc_output/
+.jest/
+
+# Temporary
+tmp/
+temp/
+.cache/
+
+# Replit
+.replit
+replit.nix
+.config/
+
+# Package locks (keep these, but list for awareness)
+# package-lock.json
+# yarn.lock
