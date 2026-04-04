@@ -199,7 +199,7 @@ export function useSSE(options: UseSSEOptions = {}) {
       try {
         if ((event as any).lastEventId) lastEventIdRef.current = (event as any).lastEventId;
         const data = JSON.parse(event.data);
-        const sseEvent: SSEEvent = { type: "picks-settled", data, timestamp: Date.now() };
+        const sseEvent: SSEEvent = { type: "picks-settled", data, timestamp: new Date().toISOString() };
         setState(prev => ({ ...prev, lastEvent: sseEvent }));
         dispatchEvent(sseEvent);
       } catch {}

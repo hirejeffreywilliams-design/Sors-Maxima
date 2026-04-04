@@ -112,6 +112,8 @@ import { AdminAIResolve } from "@/components/admin-ai-resolve";
 
 interface SubscriptionStats {
   total: number;
+  totalUsers: number;
+  paidUsers: number;
   free: number;
   pro: number;
   elite: number;
@@ -124,6 +126,8 @@ interface User {
   email: string;
   username: string;
   role: 'user' | 'admin';
+  tier: string;
+  isAdmin: boolean;
   createdAt: string;
   lastLoginAt: string | null;
   isBanned: boolean;
@@ -136,7 +140,7 @@ interface User {
 interface ErrorLog {
   id: string;
   timestamp: string;
-  level: 'error' | 'warn' | 'info';
+  level: 'error' | 'warn' | 'info' | 'critical';
   message: string;
   stack?: string;
   path?: string;
@@ -144,6 +148,7 @@ interface ErrorLog {
   userId?: string;
   ip?: string;
   userAgent?: string;
+  service?: string;
 }
 
 interface ErrorStats {
@@ -268,7 +273,7 @@ export default function AdminDashboard() {
   });
 
   const triggerPropSettlementMutation = useMutation({
-    mutationFn: async (lookbackDays = 3) => {
+    mutationFn: async (lookbackDays: number = 3) => {
       const response = await apiRequest('POST', '/api/admin/prop-settlement/trigger', { lookbackDays });
       return response.json();
     },
@@ -1515,7 +1520,7 @@ export default function AdminDashboard() {
                       <AdminAIResolve
                         category="Error Logs"
                         issue={`${errorStats?.last24Hours} errors in the last 24 hours`}
-                        severity={errorStats?.errors > 5 ? "high" : "medium"}
+                        severity={(errorStats?.errors ?? 0) > 5 ? "high" : "medium"}
                         metrics={{
                           total: errorStats?.total,
                           errors: errorStats?.errors,

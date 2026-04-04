@@ -140,7 +140,7 @@ interface TierGateProps {
   required: RequiredTier;
   label: string;
   description?: string;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   compact?: boolean;
 }
 

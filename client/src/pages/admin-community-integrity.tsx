@@ -149,7 +149,7 @@ export default function AdminCommunityIntegrity() {
 
   const resolveMutation = useMutation({
     mutationFn: (data: { alertId: number; notes: string; actionTaken: string }) =>
-      apiRequest("/api/admin/integrity/resolve-alert", { method: "POST", body: JSON.stringify(data) }).then(r => r.json()),
+      apiRequest("POST", "/api/admin/integrity/resolve-alert", data).then(r => r.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/integrity/alerts"] });
       setSelectedAlert(null);
@@ -161,7 +161,7 @@ export default function AdminCommunityIntegrity() {
 
   const suspendMutation = useMutation({
     mutationFn: (data: { userId: number; reason: string }) =>
-      apiRequest("/api/admin/integrity/suspend-discord", { method: "POST", body: JSON.stringify(data) }).then(r => r.json()),
+      apiRequest("POST", "/api/admin/integrity/suspend-discord", data).then(r => r.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/admin/integrity/discord-bindings"] });
       setSuspendUserId(null);

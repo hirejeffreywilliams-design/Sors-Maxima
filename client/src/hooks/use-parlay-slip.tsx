@@ -5,6 +5,10 @@ export interface ParlaySlipLeg extends ParlayLeg {
   addedFrom: string;
   addedAt: string;
   sport?: string;
+  game?: string;
+  odds?: number;
+  type?: string;
+  ev?: number;
   confidence?: number;
   evPercent?: number;
   grade?: string;

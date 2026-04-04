@@ -117,37 +117,38 @@
   --opaque-button-border-intensity: 9;
   --elevate-1: rgba(255,255,255, .04);
   --elevate-2: rgba(255,255,255, .09);
-  --background: 222 16% 7%;
+  /* OmniDLOS Dark Theme — bg #0a0a0a, primary #0EA5E9, secondary #06B6D4 */
+  --background: 0 0% 4%;
   --foreground: 0 0% 96%;
-  --border: 222 10% 18%;
-  --card: 222 14% 9%;
+  --border: 200 10% 16%;
+  --card: 200 8% 6%;
   --card-foreground: 0 0% 96%;
-  --card-border: 222 12% 14%;
-  --sidebar: 222 14% 10%;
+  --card-border: 200 10% 12%;
+  --sidebar: 200 8% 7%;
   --sidebar-foreground: 0 0% 96%;
-  --sidebar-border: 222 12% 15%;
-  --sidebar-primary: 145 65% 44%;
-  --sidebar-primary-foreground: 145 65% 98%;
-  --sidebar-accent: 222 12% 14%;
+  --sidebar-border: 200 10% 13%;
+  --sidebar-primary: 199 89% 48%;
+  --sidebar-primary-foreground: 199 89% 98%;
+  --sidebar-accent: 200 10% 12%;
   --sidebar-accent-foreground: 0 0% 96%;
-  --sidebar-ring: 145 65% 44%;
-  --popover: 222 14% 11%;
+  --sidebar-ring: 199 89% 48%;
+  --popover: 200 8% 8%;
   --popover-foreground: 0 0% 96%;
-  --popover-border: 222 12% 16%;
-  --primary: 145 65% 44%;
-  --primary-foreground: 145 65% 98%;
-  --secondary: 222 12% 16%;
-  --secondary-foreground: 0 0% 96%;
-  --muted: 222 10% 15%;
-  --muted-foreground: 222 8% 65%;
-  --accent: 142 12% 14%;
-  --accent-foreground: 142 12% 92%;
+  --popover-border: 200 10% 14%;
+  --primary: 199 89% 48%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 188 95% 43%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 200 10% 13%;
+  --muted-foreground: 200 8% 65%;
+  --accent: 188 30% 14%;
+  --accent-foreground: 188 30% 92%;
   --destructive: 0 84% 28%;
   --destructive-foreground: 0 84% 98%;
-  --input: 222 10% 28%;
-  --ring: 145 65% 44%;
-  --chart-1: 145 65% 60%;
-  --chart-2: 220 70% 70%;
+  --input: 200 10% 24%;
+  --ring: 199 89% 48%;
+  --chart-1: 199 89% 60%;
+  --chart-2: 188 95% 55%;
   --chart-3: 280 65% 72%;
   --chart-4: 30 80% 68%;
   --chart-5: 340 75% 70%;
@@ -211,12 +212,12 @@
       radial-gradient(ellipse 40% 30% at 55% 50%, rgba(34, 197, 94, 0.02) 0%, transparent 60%);
   }
 
-  /* Dark mode: stronger ambient blobs */
+  /* Dark mode: OmniDLOS ambient blobs */
   .dark body::before {
     background:
-      radial-gradient(ellipse 90% 55% at 5% -10%, rgba(34, 197, 94, 0.09) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 50% at 95% 105%, rgba(99, 102, 241, 0.07) 0%, transparent 60%),
-      radial-gradient(ellipse 40% 30% at 55% 50%, rgba(34, 197, 94, 0.03) 0%, transparent 60%);
+      radial-gradient(ellipse 90% 55% at 5% -10%, rgba(14, 165, 233, 0.09) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 95% 105%, rgba(6, 182, 212, 0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 30% at 55% 50%, rgba(14, 165, 233, 0.03) 0%, transparent 60%);
   }
 
   /* ── Dot-grid texture (dark mode only) ── */

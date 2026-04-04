@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from "react";
 
 interface ShareLeg {
   outcome: string;
-  americanOdds: number;
+  americanOdds?: number;
   sport?: string;
   market?: string;
   team?: string;
@@ -168,9 +168,8 @@ export function SlipShareCard({ legs, totalAmericanOdds, stake, payout, onClose 
                   transparent 72%
                 )`,
                 backgroundSize: "300% 300%",
-                animation: "holo-shift 6s ease-in-out infinite alternate",
-                mixBlendMode: "screen",
                 animation: "holo-pulse 3s ease-in-out infinite",
+                mixBlendMode: "screen",
               } as React.CSSProperties}
             />
 

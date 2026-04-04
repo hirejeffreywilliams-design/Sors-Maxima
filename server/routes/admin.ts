@@ -5953,10 +5953,10 @@ Keep steps concise and actionable. Maximum 6 steps. Respond ONLY with valid JSON
       const allGames = liveSportsData.getGames();
       const now = Date.now();
       const upcoming = allGames
-        .filter(g => g.status === "scheduled" && g.startTime.getTime() > now)
-        .sort((a, b) => a.startTime.getTime() - b.startTime.getTime())
+        .filter((g: any) => g.status === "scheduled" && g.startTime.getTime() > now)
+        .sort((a: any, b: any) => a.startTime.getTime() - b.startTime.getTime())
         .slice(0, 10)
-        .map(g => ({
+        .map((g: any) => ({
           id: g.id,
           sport: g.sport,
           homeTeam: g.homeTeam,

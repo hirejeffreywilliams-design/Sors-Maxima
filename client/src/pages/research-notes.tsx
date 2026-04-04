@@ -106,7 +106,7 @@ export default function ResearchNotes() {
 
   const createMutation = useMutation({
     mutationFn: (data: any) =>
-      apiRequest("/api/research/notes", { method: "POST", body: JSON.stringify(data) }).then(r => r.json()),
+      apiRequest("POST", "/api/research/notes", data).then(r => r.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/research/notes"] });
       setIsEditorOpen(false);
@@ -118,7 +118,7 @@ export default function ResearchNotes() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: number; data: any }) =>
-      apiRequest(`/api/research/notes/${id}`, { method: "PATCH", body: JSON.stringify(data) }).then(r => r.json()),
+      apiRequest("PATCH", `/api/research/notes/${id}`, data).then(r => r.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/research/notes"] });
       setIsEditorOpen(false);
@@ -131,7 +131,7 @@ export default function ResearchNotes() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) =>
-      apiRequest(`/api/research/notes/${id}`, { method: "DELETE" }).then(r => r.json()),
+      apiRequest("DELETE", `/api/research/notes/${id}`).then(r => r.json()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/research/notes"] });
       setDeleteNoteId(null);
@@ -142,7 +142,7 @@ export default function ResearchNotes() {
 
   const clearAllMutation = useMutation({
     mutationFn: () =>
-      apiRequest("/api/research/notes", { method: "DELETE" }).then(r => r.json()),
+      apiRequest("DELETE", "/api/research/notes").then(r => r.json()),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/research/notes"] });
       setShowClearAll(false);
@@ -153,7 +153,7 @@ export default function ResearchNotes() {
 
   const pinMutation = useMutation({
     mutationFn: ({ id, pinned }: { id: number; pinned: boolean }) =>
-      apiRequest(`/api/research/notes/${id}`, { method: "PATCH", body: JSON.stringify({ pinned }) }).then(r => r.json()),
+      apiRequest("PATCH", `/api/research/notes/${id}`, { pinned }).then(r => r.json()),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["/api/research/notes"] }),
   });
 

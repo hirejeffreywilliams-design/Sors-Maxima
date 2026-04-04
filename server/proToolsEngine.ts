@@ -519,10 +519,10 @@ export async function getCoachingAnalysisByTeamId(sport: Sport, teamId: string):
   let bdlStats: { pace?: number; offRating?: number; defRating?: number; avgPts?: number; homeWinPct?: number; last10Wins?: number } = {};
   if (sport === "NBA") {
     try {
-      const { isBDLAvailable, getEnrichedTeamData } = await import("../balldontlie-provider");
+      const { isBDLAvailable, getEnrichedTeamData } = await import("./balldontlie-provider");
       if (isBDLAvailable()) {
         const bdlTeams = await getEnrichedTeamData();
-        const match = bdlTeams.find(t =>
+        const match = bdlTeams.find((t: any) =>
           teamName.toLowerCase().includes(t.teamName.toLowerCase().split(" ").pop() || "") ||
           t.teamName.toLowerCase().includes(teamName.toLowerCase().split(" ").pop() || "")
         );

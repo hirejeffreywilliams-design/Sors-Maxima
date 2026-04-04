@@ -646,7 +646,7 @@ function getBetQualityIssue(leg: ParlaySlipLeg): BetQualityIssue | null {
     };
   }
 
-  if (americanOdds >= 700) {
+  if (americanOdds !== undefined && americanOdds >= 700) {
     const impliedPct = Math.round(100 / (americanOdds / 100 + 1));
     const breakEvenEvery = Math.round(100 / impliedPct);
     return {
@@ -673,7 +673,7 @@ function getBetQualityIssue(leg: ParlaySlipLeg): BetQualityIssue | null {
     };
   }
 
-  if (americanOdds <= -450) {
+  if (americanOdds !== undefined && americanOdds <= -450) {
     const profitPer100 = Math.round(10000 / Math.abs(americanOdds));
     return {
       headline: "Heavy chalk, light reward.",

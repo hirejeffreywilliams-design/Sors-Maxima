@@ -189,16 +189,22 @@ function AutoApprovedRow({ pick }: { pick: ReviewPick }) {
   const { toast } = useToast();
 
   const handleAdd = () => {
+    const decOdds = pick.odds < 0 ? 1 + (100 / Math.abs(pick.odds)) : 1 + (pick.odds / 100);
     const leg: ParlaySlipLeg = {
       id: pick.id,
       team: pick.pick || pick.game?.split(" vs ")?.[0] || "Pick",
       opponent: pick.game?.split(" vs ")?.[1] || "",
       outcome: pick.pick,
+      market: "moneyline",
+      decimalOdds: decOdds,
+      americanOdds: pick.odds,
       odds: pick.odds,
       sport: pick.sport,
       ev: pick.ev,
       grade: pick.grade,
       confidence: pick.confidence,
+      addedFrom: "Pick Review",
+      addedAt: new Date().toISOString(),
     };
     addLeg(leg);
     setMobileOpen(true);
@@ -259,16 +265,22 @@ export default function PickReviewPage() {
   };
 
   const handlePlace = (pick: ReviewPick) => {
+    const decOdds = pick.odds < 0 ? 1 + (100 / Math.abs(pick.odds)) : 1 + (pick.odds / 100);
     const leg: ParlaySlipLeg = {
       id: pick.id,
       team: pick.pick || pick.game?.split(" vs ")?.[0] || "Pick",
       opponent: pick.game?.split(" vs ")?.[1] || "",
       outcome: pick.pick,
+      market: "moneyline",
+      decimalOdds: decOdds,
+      americanOdds: pick.odds,
       odds: pick.odds,
       sport: pick.sport,
       ev: pick.ev,
       grade: pick.grade,
       confidence: pick.confidence,
+      addedFrom: "Pick Review",
+      addedAt: new Date().toISOString(),
     };
     addLeg(leg);
     setMobileOpen(true);

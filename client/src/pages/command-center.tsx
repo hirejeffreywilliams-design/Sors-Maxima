@@ -1887,8 +1887,8 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                       <div className="flex items-start gap-2">
                         <div className="shrink-0 mt-0.5">
                           {leg.team || leg.opponent
-                            ? <MatchupLogos homeTeam={leg.opponent || leg.team} awayTeam={leg.team} sport={leg.sport} size={20} />
-                            : <span className="text-base leading-none">{SPORT_EMOJI[leg.sport] || "🎯"}</span>
+                            ? <MatchupLogos homeTeam={leg.opponent || leg.team} awayTeam={leg.team} sport={leg.sport || ""} size={20} />
+                            : <span className="text-base leading-none">{SPORT_EMOJI[leg.sport || ""] || "🎯"}</span>
                           }
                         </div>
                         <div className="flex-1 min-w-0 overflow-hidden">
@@ -1977,8 +1977,8 @@ function LifeChangerSection({ legs, addLeg }: { legs: { id: string }[]; addLeg: 
                                     <div key={ai} className="px-3 py-2 hover:bg-muted/30 transition-colors flex items-start gap-2">
                                       <div className="shrink-0 mt-0.5">
                                         {(alt.team || alt.opponent)
-                                          ? <MatchupLogos homeTeam={alt.opponent || alt.team} awayTeam={alt.team} sport={alt.sport} size={18} />
-                                          : <span className="text-sm">{SPORT_EMOJI[alt.sport] || "🎯"}</span>
+                                          ? <MatchupLogos homeTeam={alt.opponent || alt.team} awayTeam={alt.team} sport={alt.sport || ""} size={18} />
+                                          : <span className="text-sm">{SPORT_EMOJI[alt.sport || ""] || "🎯"}</span>
                                         }
                                       </div>
                                       <div className="flex-1 min-w-0">

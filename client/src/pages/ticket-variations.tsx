@@ -127,7 +127,7 @@ function VariationCard({ variation, index }: { variation: Variation; index: numb
         opponent: leg.opponent || leg.game.split(" vs ")[1] || "",
         outcome: leg.outcome || leg.pick,
         game: leg.game,
-        market: leg.market || leg.betType,
+        market: leg.market || (leg.betType as "moneyline" | "spread" | "total" | "player_prop"),
         type: leg.betType,
         odds: leg.americanOdds,
         decimalOdds: leg.decimalOdds,

@@ -248,6 +248,8 @@ export default function MMAPage() {
       odds: fight.pickOdds,
       decimalOdds: fight.decimalOdds,
       sport: "MMA",
+      addedFrom: "MMA",
+      addedAt: new Date().toISOString(),
     };
     addLeg(leg);
     toast({ title: "Added to Slip", description: `${fight.pick} (${formatOdds(fight.pickOdds)})` });

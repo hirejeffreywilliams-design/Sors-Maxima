@@ -1682,7 +1682,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
             const clock = game.status?.clock || "";
             timeRemaining = `${game.status?.shortDetail || `Q${period} ${clock}`}`;
 
-            const betOnHome = betTeams.some(t =>
+            const betOnHome = betTeams.some((t: string) =>
               game.homeTeam.abbreviation?.toLowerCase() === t.toLowerCase() ||
               game.homeTeam.shortDisplayName?.toLowerCase().includes(t.toLowerCase())
             );
@@ -1699,7 +1699,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
             timeRemaining = "Final";
             const homeScore = game.homeTeam.score || 0;
             const awayScore = game.awayTeam.score || 0;
-            const betOnHome = betTeams.some(t =>
+            const betOnHome = betTeams.some((t: string) =>
               game.homeTeam.abbreviation?.toLowerCase() === t.toLowerCase()
             );
             momentum = (betOnHome && homeScore > awayScore) || (!betOnHome && awayScore > homeScore) ? 90 : 15;
@@ -2021,7 +2021,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
             const awayScore = game.awayTeam.score || 0;
             liveScore = `${game.homeTeam.shortDisplayName || game.homeTeam.abbreviation} ${homeScore} - ${awayScore} ${game.awayTeam.shortDisplayName || game.awayTeam.abbreviation}`;
 
-            const betOnHome = betTeams.some(t =>
+            const betOnHome = betTeams.some((t: string) =>
               game.homeTeam.abbreviation?.toLowerCase() === t.toLowerCase() ||
               game.homeTeam.shortDisplayName?.toLowerCase().includes(t.toLowerCase())
             );
@@ -2031,7 +2031,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
             const homeScore = game.homeTeam.score || 0;
             const awayScore = game.awayTeam.score || 0;
             liveScore = `Final: ${game.homeTeam.shortDisplayName} ${homeScore} - ${awayScore} ${game.awayTeam.shortDisplayName}`;
-            const betOnHome = betTeams.some(t =>
+            const betOnHome = betTeams.some((t: string) =>
               game.homeTeam.abbreviation?.toLowerCase() === t.toLowerCase()
             );
             momentum = (betOnHome && homeScore > awayScore) || (!betOnHome && awayScore > homeScore) ? 90 : 15;
@@ -3453,7 +3453,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
           }
 
           if (seasonAvg === null && leaderStats.length > 0) {
-            const ratingEntry = leaderStats.find(ls => ls.category.toLowerCase().includes("rating"));
+            const ratingEntry = leaderStats.find((ls: any) => ls.category.toLowerCase().includes("rating"));
             if (ratingEntry) {
               const ratingStr = ratingEntry.value;
               const statMatchers: Record<string, RegExp> = {

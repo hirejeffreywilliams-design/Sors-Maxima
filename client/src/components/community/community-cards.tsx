@@ -64,7 +64,7 @@ export function CommunityCards() {
   const sports = cards.map(c => (c.card as any).sport);
   const mostPopularSport = sports.length > 0 
     ? Object.entries(sports.reduce((acc, s) => ({ ...acc, [s]: (acc[s] || 0) + 1 }), {} as Record<string, number>))
-        .sort((a, b) => b[1] - a[1])[0][0]
+        .sort((a, b) => (b[1] as number) - (a[1] as number))[0][0]
     : "N/A";
   
   const grades = ["A+", "A", "B+", "B", "C+", "C", "D", "F"];
