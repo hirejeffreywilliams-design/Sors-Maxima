@@ -1,6 +1,10 @@
 // Stub for Task #26 Overdrive Engine
 // Real implementation ships with Task #26 (Monte Carlo Overdrive)
 
+export function startOverdriveEngine(): void {
+  // No-op stub — full engine added in Task #26
+}
+
 export function getOverdriveStatus(): {
   active: boolean;
   simCount: number;
