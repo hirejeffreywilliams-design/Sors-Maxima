@@ -5,6 +5,22 @@ export default {
   content: ["./client/index.html", "./client/src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      // OmniDLOS Unified Design System colors
+      omnidlos: {
+        primary: '#0EA5E9',
+        secondary: '#06B6D4',
+        background: '#0a0a0a',
+        card: '#111111',
+        cardHover: '#161616',
+        border: '#1e1e1e',
+        borderHover: '#2a2a2a',
+        text: '#ffffff',
+        textMuted: '#a1a1aa',
+        success: '#22c55e',
+        warning: '#eab308',
+        danger: '#ef4444',
+        accent: '#8b5cf6',
+      },
       borderRadius: {
         lg: ".5625rem", /* 9px */
         md: ".375rem", /* 6px */
