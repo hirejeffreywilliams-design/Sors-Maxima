@@ -104,6 +104,7 @@ const SorsBooksPage = lazy(() => import("@/pages/sorsbooks"));
 const HistoryPage = lazy(() => import("@/pages/history"));
 const AdvisorPage = lazy(() => import("@/pages/advisor"));
 const RewardsHub = lazy(() => import("@/pages/rewards-hub"));
+const MomentumChains = lazy(() => import("@/pages/MomentumChains"));
 import { Zap, Wrench, LogOut, Users, Trophy, Wallet, Activity, CreditCard, Shield, Menu, Settings as SettingsIcon, Brain, UsersRound, HelpCircle, User, LayoutGrid, Calendar, ChevronRight, ChevronLeft, Home, TrendingUp, History, Calculator, Star, Database, Compass, MoreHorizontal, Globe, ChevronDown, BarChart2, BookOpen, Eye, Flame, LineChart, Ticket, Sword, MailWarning, X, ClipboardList, Sliders, Landmark, Scale, ShieldCheck, ReceiptText, DollarSign } from "lucide-react";
 import { useBottomNavPrefs, ALL_NAV_ITEMS, type NavItemDef } from "@/hooks/use-bottom-nav-prefs";
 import sorsMaximaLogo from "@/assets/sors-maxima-logo-gold.png";
@@ -328,6 +329,7 @@ function Router({ authState }: { authState: AuthState }) {
         <Route path="/builder" component={Dashboard} />
         <Route path="/daily"><Redirect to="/generate" /></Route>
         <Route path="/tools" component={Tools} />
+        <Route path="/momentum-chains" component={MomentumChains} />
         <Route path="/community" component={Community} />
         <Route path="/rewards" component={RewardsHub} />
         <Route path="/bankroll" component={Bankroll} />
