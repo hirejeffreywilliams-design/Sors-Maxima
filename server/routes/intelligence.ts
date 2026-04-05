@@ -1528,7 +1528,8 @@ The break-even win rate for standard -110 bets is 52.4%. Sharp bettors typically
       // Auto-mint legendary system card if won
       if (outcome === "won" && !lct.minted_card_id) {
         try {
-          const adminUser = await db.select().from(users).where(eq(users.username, process.env.ADMIN_USERNAME || "jeffreywilliams")).limit(1);
+          if (!process.env.ADMIN_USERNAME) throw new Error("ADMIN_USERNAME env var not set");
+          const adminUser = await db.select().from(users).where(eq(users.username, process.env.ADMIN_USERNAME)).limit(1);
           const adminId = adminUser[0]?.id;
           if (!adminId) throw new Error("Admin user not found");
 
@@ -1553,7 +1554,8 @@ The break-even win rate for standard -110 bets is 52.4%. Sharp bettors typically
             createdAt: new Date(),
           }).returning();
 
-          const sigKey = process.env.SESSION_SECRET || "sors-maxima-intelligence-2025";
+          if (!process.env.SESSION_SECRET) throw new Error("SESSION_SECRET env var not set");
+          const sigKey = process.env.SESSION_SECRET;
           const sig = crypto.createHash("sha256").update(`${adminId}:${cardId}:1:${sigKey}`).digest("hex");
 
           const [collEntry] = await db.insert(userCardCollections).values({

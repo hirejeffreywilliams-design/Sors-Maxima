@@ -4,17 +4,28 @@
  * @license    Proprietary
  */
 
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { crossPlatformBridge } from "../crossPlatformBridge";
+import { requireAuth, requireAdmin } from "./helpers";
+
+/** Ownership guard: ensures :userId matches session user (or admin) */
+function requireOwnership(req: Request, res: Response, next: NextFunction) {
+  const paramUserId = req.params.userId;
+  if (paramUserId !== req.session?.userId && !req.session?.isAdmin) {
+    return res.status(403).json({ error: "Access denied" });
+  }
+  next();
+}
 
 export function registerCrossPlatformBridgeRoutes(app: Express): void {
   // ── Sync ───────────────────────────────────────────────────────────────
 
-  app.post("/api/bridge/sync", (req, res) => {
+  app.post("/api/bridge/sync", requireAuth, (req, res) => {
     try {
-      const { type, sourcePlatform, targetPlatform, userId, payload } = req.body;
-      if (!type || !sourcePlatform || !targetPlatform || !userId || !payload) {
-        return res.status(400).json({ error: "type, sourcePlatform, targetPlatform, userId, and payload required" });
+      const { type, sourcePlatform, targetPlatform, payload } = req.body;
+      const userId = req.session!.userId!;
+      if (!type || !sourcePlatform || !targetPlatform || !payload) {
+        return res.status(400).json({ error: "type, sourcePlatform, targetPlatform, and payload required" });
       }
       const signal = crossPlatformBridge.sendSignal({ type, sourcePlatform, targetPlatform, userId, payload });
       if (!signal) return res.status(403).json({ error: "Signal blocked by data sovereignty controls" });
@@ -25,10 +36,11 @@ export function registerCrossPlatformBridgeRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/bridge/sync/acknowledge", (req, res) => {
+  app.post("/api/bridge/sync/acknowledge", requireAuth, (req, res) => {
     try {
-      const { signalId, userId } = req.body;
-      if (!signalId || !userId) return res.status(400).json({ error: "signalId and userId required" });
+      const { signalId } = req.body;
+      const userId = req.session!.userId!;
+      if (!signalId) return res.status(400).json({ error: "signalId required" });
       const acknowledged = crossPlatformBridge.acknowledgeSignal(signalId, userId);
       if (!acknowledged) return res.status(404).json({ error: "Signal not found" });
       res.json({ acknowledged: true });
@@ -38,7 +50,7 @@ export function registerCrossPlatformBridgeRoutes(app: Express): void {
     }
   });
 
-  app.get("/api/bridge/sync/pending/:userId", (req, res) => {
+  app.get("/api/bridge/sync/pending/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const { platform } = req.query;
       if (!platform) return res.status(400).json({ error: "platform query param required" });
@@ -52,7 +64,7 @@ export function registerCrossPlatformBridgeRoutes(app: Express): void {
 
   // ── Status ─────────────────────────────────────────────────────────────
 
-  app.get("/api/bridge/status/:userId", (req, res) => {
+  app.get("/api/bridge/status/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const status = crossPlatformBridge.getSyncStatus(req.params.userId);
       res.json(status);
@@ -64,7 +76,7 @@ export function registerCrossPlatformBridgeRoutes(app: Express): void {
 
   // ── Permissions (Data Sovereignty) ─────────────────────────────────────
 
-  app.get("/api/bridge/permissions/:userId", (req, res) => {
+  app.get("/api/bridge/permissions/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const permissions = crossPlatformBridge.getPermissions(req.params.userId);
       if (!permissions) return res.status(404).json({ error: "No permissions configured" });
@@ -75,7 +87,7 @@ export function registerCrossPlatformBridgeRoutes(app: Express): void {
     }
   });
 
-  app.put("/api/bridge/permissions/:userId", (req, res) => {
+  app.put("/api/bridge/permissions/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const { permissions, dataRetentionDays, shareEmotionalData, shareLifeContext, shareBettingActivity, shareVibeCredits } = req.body;
       if (!permissions) return res.status(400).json({ error: "permissions array required" });
@@ -96,7 +108,7 @@ export function registerCrossPlatformBridgeRoutes(app: Express): void {
 
   // ── Life Context ───────────────────────────────────────────────────────
 
-  app.get("/api/bridge/life-context/:userId", (req, res) => {
+  app.get("/api/bridge/life-context/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const context = crossPlatformBridge.getLifeContext(req.params.userId);
       if (!context) return res.status(404).json({ error: "No life context recorded" });
@@ -107,7 +119,7 @@ export function registerCrossPlatformBridgeRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/bridge/life-context/:userId", (req, res) => {
+  app.post("/api/bridge/life-context/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const { stressLevel, sleepQuality, energyLevel, majorEvents } = req.body;
       if (stressLevel === undefined || sleepQuality === undefined || energyLevel === undefined) {
@@ -128,7 +140,7 @@ export function registerCrossPlatformBridgeRoutes(app: Express): void {
 
   // ── Sports Mood ────────────────────────────────────────────────────────
 
-  app.get("/api/bridge/sports-mood/:userId", (req, res) => {
+  app.get("/api/bridge/sports-mood/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const limit = req.query.limit ? parseInt(req.query.limit as string, 10) : 20;
       const emotions = crossPlatformBridge.getSportsEmotions(req.params.userId, limit);
@@ -139,11 +151,12 @@ export function registerCrossPlatformBridgeRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/bridge/sports-mood", (req, res) => {
+  app.post("/api/bridge/sports-mood", requireAuth, (req, res) => {
     try {
-      const { userId, sport, gameId, emotion, intensity, trigger } = req.body;
-      if (!userId || !sport || !emotion || intensity === undefined || !trigger) {
-        return res.status(400).json({ error: "userId, sport, emotion, intensity, and trigger required" });
+      const { sport, gameId, emotion, intensity, trigger } = req.body;
+      const userId = req.session!.userId!;
+      if (!sport || !emotion || intensity === undefined || !trigger) {
+        return res.status(400).json({ error: "sport, emotion, intensity, and trigger required" });
       }
       const mapping = crossPlatformBridge.recordSportsEmotion({
         userId,
@@ -163,7 +176,7 @@ export function registerCrossPlatformBridgeRoutes(app: Express): void {
 
   // ── Vibe Credits ───────────────────────────────────────────────────────
 
-  app.get("/api/bridge/vibe-credits/:userId", (req, res) => {
+  app.get("/api/bridge/vibe-credits/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const credits = crossPlatformBridge.getVibeCredits(req.params.userId);
       const balance = crossPlatformBridge.getVibeCreditBalance(req.params.userId);
@@ -174,11 +187,12 @@ export function registerCrossPlatformBridgeRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/bridge/vibe-credits/transfer", (req, res) => {
+  app.post("/api/bridge/vibe-credits/transfer", requireAuth, (req, res) => {
     try {
-      const { userId, amount, from, to, reason } = req.body;
-      if (!userId || !amount || !from || !to || !reason) {
-        return res.status(400).json({ error: "userId, amount, from, to, and reason required" });
+      const userId = req.session!.userId!;
+      const { amount, from, to, reason } = req.body;
+      if (!amount || !from || !to || !reason) {
+        return res.status(400).json({ error: "amount, from, to, and reason required" });
       }
       const credit = crossPlatformBridge.transferVibeCredits(userId, amount, from, to, reason);
       if (!credit) return res.status(403).json({ error: "Transfer blocked by data sovereignty controls" });
@@ -191,7 +205,7 @@ export function registerCrossPlatformBridgeRoutes(app: Express): void {
 
   // ── Safety Flags ───────────────────────────────────────────────────────
 
-  app.get("/api/bridge/safety-flags/:userId", (req, res) => {
+  app.get("/api/bridge/safety-flags/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const profile = crossPlatformBridge.getSafetyProfile(req.params.userId);
       if (!profile) {
@@ -206,7 +220,7 @@ export function registerCrossPlatformBridgeRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/bridge/safety-flags/:userId/assess", (req, res) => {
+  app.post("/api/bridge/safety-flags/:userId/assess", requireAuth, requireOwnership, (req, res) => {
     try {
       const profile = crossPlatformBridge.assessSafety(req.params.userId);
       res.json(profile);
@@ -216,7 +230,7 @@ export function registerCrossPlatformBridgeRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/bridge/safety-flags/:userId/resolve/:flagId", (req, res) => {
+  app.post("/api/bridge/safety-flags/:userId/resolve/:flagId", requireAuth, requireOwnership, (req, res) => {
     try {
       const resolved = crossPlatformBridge.resolveSafetyFlag(req.params.userId, req.params.flagId);
       if (!resolved) return res.status(404).json({ error: "Safety flag not found" });

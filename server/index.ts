@@ -13,6 +13,9 @@ import compression from "compression";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import cors from "cors";
+import rateLimit from "express-rate-limit";
 import { registerRoutes } from "./routes";
 import { serveStatic } from "./static";
 import { createServer } from "http";
@@ -106,6 +109,27 @@ app.use(compression({
 }));
 
 // ─── Security Middleware ──────────────────────────────────────────────────────
+app.use(helmet({
+  contentSecurityPolicy: false, // CSP is set in securityHeadersMiddleware
+  hsts: { maxAge: 31536000, includeSubDomains: true },
+}));
+
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean);
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.length === 0 && process.env.NODE_ENV !== 'production') {
+      return callback(null, true);
+    }
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
+
 app.use(securityHeadersMiddleware);
 app.use(ipBlockMiddleware);
 
@@ -128,7 +152,11 @@ app.use(session({
     createTableIfMissing: true,
     pruneSessionInterval: 60 * 15, // prune expired sessions every 15 min
   }),
-  secret: process.env.SESSION_SECRET || (() => {
+  secret: (() => {
+    if (process.env.SESSION_SECRET) return process.env.SESSION_SECRET;
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('[SECURITY] SESSION_SECRET must be set in production');
+    }
     const generated = require('crypto').randomBytes(64).toString('hex');
     console.warn('[SECURITY] No SESSION_SECRET env var set — using auto-generated secret. Sessions will not persist across restarts.');
     return generated;
@@ -138,10 +166,54 @@ app.use(session({
   cookie: {
     secure: process.env.NODE_ENV === "production",
     httpOnly: true,
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days (was 24h)
-    sameSite: "lax",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    sameSite: "strict" as const,
   },
 }));
+
+// ─── Rate Limiters (express-rate-limit) ──────────────────────────────────────
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const forwarded = req.headers['x-forwarded-for'];
+    return typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : req.socket.remoteAddress || 'unknown';
+  },
+  message: { error: "Too many authentication attempts. Please try again in 15 minutes." },
+});
+
+const predictionLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => req.session?.userId || req.socket.remoteAddress || 'unknown',
+  message: { error: "Prediction rate limit exceeded. Please wait before making more requests." },
+});
+
+const generalApiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  keyGenerator: (req) => {
+    const forwarded = req.headers['x-forwarded-for'];
+    return typeof forwarded === 'string' ? forwarded.split(',')[0].trim() : req.socket.remoteAddress || 'unknown';
+  },
+  message: { error: "Too many requests. Please try again later." },
+});
+
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/register", authLimiter);
+app.use("/api/auth/forgot-password", authLimiter);
+app.use("/api/auth/reset-password", authLimiter);
+app.use("/api/generate-tickets", predictionLimiter);
+app.use("/api/generate-parlays", predictionLimiter);
+app.use("/api/evaluate", predictionLimiter);
+app.use("/api/recalculate-predictions", predictionLimiter);
+app.use("/api", generalApiLimiter);
 
 app.use("/api", csrfTokenMiddleware);
 app.use("/api", csrfValidationMiddleware);
@@ -646,10 +718,10 @@ async function checkEmailSequences(): Promise<void> {
 
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
+    const internalMessage = err.message || "Internal Server Error";
 
     const errorId = errorLogger.logRequestError(
-      err instanceof Error ? err : new Error(message),
+      err instanceof Error ? err : new Error(internalMessage),
       {
         path: req.path,
         method: req.method,
@@ -661,12 +733,21 @@ async function checkEmailSequences(): Promise<void> {
 
     if (status >= 500 && process.env.SENTRY_DSN) Sentry.captureException(err);
 
-    res.status(status).json({ 
-      message,
-      errorId: status >= 500 ? errorId : undefined
+    // Never leak stack traces or internal error details to clients
+    const clientMessage = status >= 500
+      ? "Internal Server Error"
+      : internalMessage;
+
+    res.status(status).json({
+      error: clientMessage,
+      errorId: status >= 500 ? errorId : undefined,
     });
-    
-    console.error(`[${errorId}] ${req.method} ${req.path}:`, err);
+
+    // Log full error details server-side only
+    console.error(`[${errorId}] ${req.method} ${req.path}:`, internalMessage);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error(err.stack || err);
+    }
   });
 
   if (process.env.NODE_ENV === "production") {

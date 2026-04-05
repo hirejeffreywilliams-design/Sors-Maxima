@@ -4,17 +4,26 @@
  * @license    Proprietary
  */
 
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { bettingMomentumEngine } from "../bettingMomentumEngine";
+import { requireAuth, requireAdmin } from "./helpers";
+
+/** Ownership guard: ensures :userId matches session user (or admin) */
+function requireOwnership(req: Request, res: Response, next: NextFunction) {
+  const paramUserId = req.params.userId;
+  if (paramUserId !== req.session?.userId && !req.session?.isAdmin) {
+    return res.status(403).json({ error: "Access denied" });
+  }
+  next();
+}
 
 export function registerBettingMomentumRoutes(app: Express): void {
   // ── Momentum Score ─────────────────────────────────────────────────────
 
-  app.get("/api/momentum/score/:userId", (req, res) => {
+  app.get("/api/momentum/score/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const score = bettingMomentumEngine.getScore(req.params.userId);
       if (!score) {
-        // Calculate on-demand if not cached
         const calculated = bettingMomentumEngine.calculateScore(req.params.userId);
         return res.json(calculated);
       }
@@ -25,7 +34,7 @@ export function registerBettingMomentumRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/momentum/score/:userId/calculate", (req, res) => {
+  app.post("/api/momentum/score/:userId/calculate", requireAuth, requireOwnership, (req, res) => {
     try {
       const score = bettingMomentumEngine.calculateScore(req.params.userId);
       res.json(score);
@@ -60,10 +69,11 @@ export function registerBettingMomentumRoutes(app: Express): void {
 
   // ── Join Stream ────────────────────────────────────────────────────────
 
-  app.post("/api/momentum/streams/:id/join", (req, res) => {
+  app.post("/api/momentum/streams/:id/join", requireAuth, (req, res) => {
     try {
-      const { userId, username } = req.body;
-      if (!userId || !username) return res.status(400).json({ error: "userId and username required" });
+      const userId = req.session!.userId!;
+      const username = req.session!.username!;
+      if (!userId || !username) return res.status(400).json({ error: "Authentication required" });
       const member = bettingMomentumEngine.joinStream(req.params.id, userId, username);
       if (!member) return res.status(404).json({ error: "Stream not found" });
       res.json(member);
@@ -75,7 +85,7 @@ export function registerBettingMomentumRoutes(app: Express): void {
 
   // ── Milestones ─────────────────────────────────────────────────────────
 
-  app.get("/api/momentum/milestones/:userId", (req, res) => {
+  app.get("/api/momentum/milestones/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const milestones = bettingMomentumEngine.getMilestones(req.params.userId);
       res.json(milestones);
@@ -87,7 +97,7 @@ export function registerBettingMomentumRoutes(app: Express): void {
 
   // ── Hot Hands ──────────────────────────────────────────────────────────
 
-  app.get("/api/momentum/hot-hands/:userId", (req, res) => {
+  app.get("/api/momentum/hot-hands/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const hotHands = bettingMomentumEngine.getHotHands(req.params.userId);
       res.json(hotHands);
@@ -97,7 +107,7 @@ export function registerBettingMomentumRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/momentum/hot-hands/:userId/detect", (req, res) => {
+  app.post("/api/momentum/hot-hands/:userId/detect", requireAuth, requireOwnership, (req, res) => {
     try {
       const { sport } = req.body;
       if (!sport) return res.status(400).json({ error: "sport required" });
@@ -126,10 +136,12 @@ export function registerBettingMomentumRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/momentum/mentors", (req, res) => {
+  app.post("/api/momentum/mentors", requireAuth, (req, res) => {
     try {
-      const { userId, username, specialties, winRate, roi, bio } = req.body;
-      if (!userId || !username || !specialties) return res.status(400).json({ error: "userId, username, and specialties required" });
+      const userId = req.session!.userId!;
+      const username = req.session!.username!;
+      const { specialties, winRate, roi, bio } = req.body;
+      if (!specialties) return res.status(400).json({ error: "specialties required" });
       const mentor = bettingMomentumEngine.registerMentor({ userId, username, specialties, winRate: winRate || 0, roi: roi || 0, bio: bio || "" });
       res.status(201).json(mentor);
     } catch (err) {
@@ -140,7 +152,7 @@ export function registerBettingMomentumRoutes(app: Express): void {
 
   // ── Analytics ──────────────────────────────────────────────────────────
 
-  app.get("/api/momentum/analytics/:userId", (req, res) => {
+  app.get("/api/momentum/analytics/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const score = bettingMomentumEngine.calculateScore(req.params.userId);
       const streaks = bettingMomentumEngine.getStreakAnalytics(req.params.userId);
@@ -157,7 +169,7 @@ export function registerBettingMomentumRoutes(app: Express): void {
 
   // ── Streaks ────────────────────────────────────────────────────────────
 
-  app.get("/api/momentum/streaks/:userId", (req, res) => {
+  app.get("/api/momentum/streaks/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const streaks = bettingMomentumEngine.getStreakAnalytics(req.params.userId);
       res.json(streaks);
@@ -169,11 +181,12 @@ export function registerBettingMomentumRoutes(app: Express): void {
 
   // ── Record Pick & Bankroll ─────────────────────────────────────────────
 
-  app.post("/api/momentum/picks", (req, res) => {
+  app.post("/api/momentum/picks", requireAuth, (req, res) => {
     try {
-      const { userId, sport, result, odds, stake, payout } = req.body;
-      if (!userId || !sport || !result || odds === undefined || stake === undefined || payout === undefined) {
-        return res.status(400).json({ error: "userId, sport, result, odds, stake, and payout required" });
+      const userId = req.session!.userId!;
+      const { sport, result, odds, stake, payout } = req.body;
+      if (!sport || !result || odds === undefined || stake === undefined || payout === undefined) {
+        return res.status(400).json({ error: "sport, result, odds, stake, and payout required" });
       }
       const pick = bettingMomentumEngine.recordPick(userId, { sport, result, odds, stake, payout });
       res.status(201).json(pick);
@@ -183,7 +196,7 @@ export function registerBettingMomentumRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/momentum/bankroll/:userId", (req, res) => {
+  app.post("/api/momentum/bankroll/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const { currentBankroll } = req.body;
       if (currentBankroll === undefined) return res.status(400).json({ error: "currentBankroll required" });
@@ -197,7 +210,7 @@ export function registerBettingMomentumRoutes(app: Express): void {
 
   // ── Cross-Sport Transfer ───────────────────────────────────────────────
 
-  app.get("/api/momentum/transfer/:userId", (req, res) => {
+  app.get("/api/momentum/transfer/:userId", requireAuth, requireOwnership, (req, res) => {
     try {
       const { fromSport, toSport } = req.query;
       if (!fromSport || !toSport) return res.status(400).json({ error: "fromSport and toSport query params required" });

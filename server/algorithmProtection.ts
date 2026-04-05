@@ -7,13 +7,22 @@ import {
   createHash,
 } from "crypto";
 
-const BASE_SECRET = process.env.ADMIN_PASSWORD || (() => {
+const BASE_SECRET = (() => {
+  if (process.env.ADMIN_PASSWORD) return process.env.ADMIN_PASSWORD;
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('[SECURITY] ADMIN_PASSWORD must be set in production for algorithm protection');
+  }
   const generated = randomBytes(32).toString('hex');
   console.warn('[SECURITY] No ADMIN_PASSWORD env var set — using auto-generated key for algorithm protection.');
   return generated;
 })();
 
-const DERIVED_SALT = process.env.ADMIN_PASSWORD ? "sors-maxima-salt-v1" : randomBytes(16).toString('hex');
+const DERIVED_SALT = process.env.ALGORITHM_SALT || (() => {
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('[SECURITY] ALGORITHM_SALT must be set in production');
+  }
+  return randomBytes(16).toString('hex');
+})();
 
 function deriveKey(purpose: string, length: number = 32): Buffer {
   return scryptSync(BASE_SECRET + purpose, DERIVED_SALT, length);

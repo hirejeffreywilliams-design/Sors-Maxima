@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { db } from "../db";
 import { sql } from "drizzle-orm";
 import { requireAdmin, requireAuth, requireTier, getClientIp, idempotencyMiddleware, rateLimitByTier, formatUptime } from "./helpers";
+import { logAuditFromRequest } from "../auditLog";
 import { evaluateRequestSchema, generateParlaysRequestSchema, sports } from "@shared/schema";
 import { fromError } from "zod-validation-error";
 
@@ -224,6 +225,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
 
   app.post("/api/generate-tickets", requireTier("pro", "elite", "whale"), rateLimitByTier("generate-tickets", { pro: 25, elite: 100, whale: 500 }, 3600000), async (req, res) => {
     try {
+      logAuditFromRequest(req, "generate_tickets", "prediction", undefined, { sports: req.body.sports, riskLevel: req.body.riskLevel });
       const { sports, bankroll, riskLevel, maxLegs, includeProps, betTypes } = req.body;
 
       if (!sports || !Array.isArray(sports) || sports.length === 0) {
@@ -537,6 +539,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
 
   app.post("/api/generate-parlays", requireTier("pro", "elite", "whale"), rateLimitByTier("generate-parlays", { pro: 25, elite: 100, whale: 500 }, 3600000), idempotencyMiddleware, async (req, res) => {
     try {
+      logAuditFromRequest(req, "generate_parlays", "prediction", undefined, { sport: req.body.sport, stake: req.body.stake });
       const parseResult = generateParlaysRequestSchema.safeParse(req.body);
 
       if (!parseResult.success) {
@@ -664,6 +667,7 @@ export async function registerBettingRoutes(app: Express): Promise<void> {
 
   app.post("/api/evaluate", requireTier("pro", "elite", "whale"), rateLimitByTier("evaluate", { pro: 50, elite: 200, whale: 1000 }, 3600000), idempotencyMiddleware, async (req, res) => {
     try {
+      logAuditFromRequest(req, "evaluate_bet", "prediction", undefined, { legCount: req.body.legs?.length, stake: req.body.stake });
       const parseResult = evaluateRequestSchema.safeParse(req.body);
 
       if (!parseResult.success) {

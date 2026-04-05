@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { requireAdmin, requireAuth, requireTier, getClientIp, idempotencyMiddleware, rateLimitByTier } from "./helpers";
 import { sensitiveRouteRateLimitMiddleware } from "../securityMiddleware";
 import { stripeService } from "../stripeService";
+import { logAuditFromRequest } from "../auditLog";
 import { WebhookHandlers } from "../webhookHandlers";
 import * as featuresService from "../featuresService";
 import { generateVegasPredictions, getVegasInsights } from "../vegas-engine";
@@ -110,6 +111,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
         return res.status(401).json({ error: "Not authenticated" });
       }
 
+      logAuditFromRequest(req, "stripe_checkout", "subscription", req.body.priceId, { priceId: req.body.priceId }, "critical");
       const { priceId } = req.body;
       if (!priceId) {
         return res.status(400).json({ error: "Price ID required" });
@@ -150,6 +152,7 @@ export async function registerAccountRoutes(app: Express): Promise<void> {
         return res.status(401).json({ error: "Not authenticated" });
       }
 
+      logAuditFromRequest(req, "stripe_portal_access", "subscription", undefined, {}, "info");
       const subscription = await stripeService.getUserSubscription(req.session.username);
       if (!subscription.stripeCustomerId) {
         // Redirect to pricing if no customer ID exists

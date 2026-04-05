@@ -635,6 +635,28 @@ export async function runMigrations(): Promise<void> {
 
     await db.execute(sql`ALTER TABLE user_betting_profile ADD COLUMN IF NOT EXISTS sport_focus TEXT DEFAULT NULL`);
 
+    // ── Security Audit Log ─────────────────────────────────────────────────────
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS audit_log (
+        id SERIAL PRIMARY KEY,
+        timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        user_id TEXT,
+        username TEXT,
+        action TEXT NOT NULL,
+        resource_type TEXT NOT NULL,
+        resource_id TEXT,
+        ip_address TEXT,
+        user_agent TEXT,
+        details JSONB NOT NULL DEFAULT '{}',
+        severity TEXT NOT NULL DEFAULT 'info' CHECK (severity IN ('info', 'warning', 'critical'))
+      )
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_al_user_id ON audit_log(user_id)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_al_action ON audit_log(action)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_al_resource ON audit_log(resource_type, resource_id)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_al_timestamp ON audit_log(timestamp DESC)`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_al_severity ON audit_log(severity)`);
+
     console.log("[Migrations] All startup migrations applied successfully");
   } catch (err: any) {
     console.error("[Migrations] Migration error (non-fatal):", err.message);

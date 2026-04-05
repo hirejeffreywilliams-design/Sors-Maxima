@@ -6,6 +6,7 @@
 
 import type { Express } from "express";
 import { sportsVibeEngine } from "../sportsVibeEngine";
+import { requireAuth, requireAdmin } from "./helpers";
 
 export function registerSportsVibeRoutes(app: Express): void {
   // ── Rooms CRUD ─────────────────────────────────────────────────────────
@@ -189,8 +190,11 @@ export function registerSportsVibeRoutes(app: Express): void {
 
   // ── Credits ────────────────────────────────────────────────────────────
 
-  app.get("/api/vibe/credits/:userId", (req, res) => {
+  app.get("/api/vibe/credits/:userId", requireAuth, (req, res) => {
     try {
+      if (req.params.userId !== req.session?.userId && !req.session?.isAdmin) {
+        return res.status(403).json({ error: "Access denied" });
+      }
       const credits = sportsVibeEngine.getCredits(req.params.userId);
       res.json(credits);
     } catch (err) {
@@ -199,7 +203,7 @@ export function registerSportsVibeRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/vibe/credits/:userId/award", (req, res) => {
+  app.post("/api/vibe/credits/:userId/award", requireAdmin, (req, res) => {
     try {
       const { amount, reason } = req.body;
       if (!amount || !reason) return res.status(400).json({ error: "amount and reason required" });
@@ -211,8 +215,11 @@ export function registerSportsVibeRoutes(app: Express): void {
     }
   });
 
-  app.post("/api/vibe/credits/:userId/spend", (req, res) => {
+  app.post("/api/vibe/credits/:userId/spend", requireAuth, (req, res) => {
     try {
+      if (req.params.userId !== req.session?.userId && !req.session?.isAdmin) {
+        return res.status(403).json({ error: "Access denied" });
+      }
       const { amount, reason } = req.body;
       if (!amount || !reason) return res.status(400).json({ error: "amount and reason required" });
       const credits = sportsVibeEngine.spendCredits(req.params.userId, amount, reason);

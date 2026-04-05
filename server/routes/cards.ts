@@ -147,7 +147,8 @@ router.post("/packs/open", async (req, res) => {
     
     for (const card of selected) {
       const instanceNum = (card.copiesIssued || 0) + 1;
-      const sigKey = process.env.SESSION_SECRET || "sors-maxima-intelligence-2025";
+      if (!process.env.SESSION_SECRET) throw new Error("SESSION_SECRET env var not set");
+      const sigKey = process.env.SESSION_SECRET;
       const cardSignature = crypto
         .createHash("sha256")
         .update(`${userId}:${card.id}:${instanceNum}:${sigKey}`)
@@ -342,7 +343,8 @@ router.get("/verify/:collectionId", async (req, res) => {
       return res.status(404).json({ authentic: false, message: "Card not found" });
     }
 
-    const sigKey = process.env.SESSION_SECRET || "sors-maxima-intelligence-2025";
+    if (!process.env.SESSION_SECRET) throw new Error("SESSION_SECRET env var not set");
+    const sigKey = process.env.SESSION_SECRET;
     const expectedSig = crypto
       .createHash("sha256")
       .update(`${entry.collection.userId}:${entry.collection.cardId}:${entry.collection.instanceNumber}:${sigKey}`)
@@ -733,7 +735,8 @@ router.post("/admin/manual-mint", async (req, res) => {
       createdAt: new Date(),
     }).returning();
 
-    const sigKey = process.env.SESSION_SECRET || "sors-maxima-intelligence-2025";
+    if (!process.env.SESSION_SECRET) throw new Error("SESSION_SECRET env var not set");
+    const sigKey = process.env.SESSION_SECRET;
     const sig = crypto.createHash("sha256").update(`${targetUser.id}:${cardId}:1:${sigKey}`).digest("hex");
 
     const [collEntry] = await db.insert(userCardCollections).values({

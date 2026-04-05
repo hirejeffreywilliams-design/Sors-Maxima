@@ -6,8 +6,18 @@ if (!resend) {
   console.warn("RESEND_API_KEY is missing. Email service will skip sending emails.");
 }
 
-const FROM_EMAIL = process.env.FROM_EMAIL || "Sors Maxima <onboarding@resend.dev>";
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "hirejeffreywilliams@gmail.com";
+function requireEnv(key: string): string {
+  const val = process.env[key];
+  if (!val && process.env.NODE_ENV === 'production') {
+    throw new Error(`[SECURITY] Required env var ${key} is not set`);
+  }
+  return val || '';
+}
+
+const FROM_EMAIL = process.env.FROM_EMAIL || (process.env.NODE_ENV === 'production'
+  ? (() => { throw new Error('[SECURITY] FROM_EMAIL must be set in production'); })()
+  : "Sors Maxima <noreply@localhost>");
+const ADMIN_EMAIL = requireEnv('ADMIN_EMAIL');
 
 export async function sendApplicationConfirmation(to: string, username: string, tier: string): Promise<boolean> {
   if (!resend) return false;

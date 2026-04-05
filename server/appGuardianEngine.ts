@@ -305,7 +305,7 @@ class AppGuardianEngine {
       { name: "ESPN Scoreboard", url: `${ESPN_BASE}/football/nfl/scoreboard`, category: "espn" },
       { name: "ESPN NBA", url: `${ESPN_BASE}/basketball/nba/scoreboard`, category: "espn" },
       { name: "Weather API", url: "https://api.open-meteo.com/v1/forecast?latitude=40.7&longitude=-74.0&hourly=temperature_2m&forecast_days=1", category: "weather" },
-      { name: "Odds API", url: "https://api.the-odds-api.com/v4/sports/?apiKey=" + (process.env.THE_ODDS_API_KEY || "test"), category: "odds" },
+      ...(process.env.THE_ODDS_API_KEY ? [{ name: "Odds API", url: "https://api.the-odds-api.com/v4/sports/?apiKey=" + process.env.THE_ODDS_API_KEY, category: "odds" }] : []),
     ];
 
     const internalChecks: Array<{ name: string; path: string; category: string }> = [

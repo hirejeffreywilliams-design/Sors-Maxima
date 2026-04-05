@@ -7,6 +7,7 @@ import { stripeService } from "../stripeService";
 import { generateAndStoreCode, validateCode, markEmailVerified, getEmailVerifiedStatus, generateResetToken, consumeResetToken, isValidResetToken } from "../emailVerification";
 import { sendVerificationEmail, sendPasswordResetEmail } from "../emailService";
 import { getFounderData } from "../foundersEngine";
+import { logAuditFromRequest } from "../auditLog";
 
 export function registerAuthRoutes(app: Express): void {
   app.post("/api/auth/register", sensitiveRouteRateLimitMiddleware, async (req, res) => {
@@ -57,8 +58,9 @@ export function registerAuthRoutes(app: Express): void {
       req.session.isAdmin = false;
       req.session.role = 'user';
 
-      return res.json({ 
-        success: true, 
+      logAuditFromRequest(req, "user_register", "auth", userIdStr, { username, email });
+      return res.json({
+        success: true,
         username,
         email,
         requiresVerification: result.fraudRisk?.action === 'verify',
@@ -140,7 +142,10 @@ export function registerAuthRoutes(app: Express): void {
         return res.status(401).json({ error: "Authentication required" });
       }
       if (userId === "admin") {
-        return res.json({ email: process.env.ADMIN_EMAIL || "hirejeffreywilliams@gmail.com" });
+        if (!process.env.ADMIN_EMAIL) {
+          return res.status(500).json({ error: "Server misconfiguration: ADMIN_EMAIL not set" });
+        }
+        return res.json({ email: process.env.ADMIN_EMAIL });
       }
       const user = await getUserById(Number(userId));
       if (!user) {
@@ -183,7 +188,7 @@ export function registerAuthRoutes(app: Express): void {
             res.cookie('device_token', result.rawToken, {
               httpOnly: true,
               secure: process.env.NODE_ENV === 'production',
-              sameSite: 'lax',
+              sameSite: 'strict',
               maxAge: 60 * 24 * 60 * 60 * 1000,
               path: '/',
             });
@@ -191,6 +196,7 @@ export function registerAuthRoutes(app: Express): void {
         }
 
         await new Promise<void>((resolve, reject) => req.session.save(err => err ? reject(err) : resolve()));
+        logAuditFromRequest(req, "admin_login", "auth", "admin", { username: ADMIN_USERNAME }, "critical");
         return res.json({ success: true, username: ADMIN_USERNAME, isAdmin: true });
       }
 
@@ -212,7 +218,7 @@ export function registerAuthRoutes(app: Express): void {
           res.cookie('device_token', deviceResult.rawToken, {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            sameSite: 'strict',
             maxAge: 60 * 24 * 60 * 60 * 1000,
             path: '/',
           });
@@ -230,8 +236,9 @@ export function registerAuthRoutes(app: Express): void {
         founderCreditsEarned: loginFounderData.founderCreditsEarned,
       } : {};
 
-      return res.json({ 
-        success: true, 
+      logAuditFromRequest(req, "user_login", "auth", String(result.user!.id), { username: result.user!.username });
+      return res.json({
+        success: true,
         username: result.user!.username,
         isAdmin: result.user!.isAdmin,
         ...loginFounderFields,
@@ -304,6 +311,7 @@ export function registerAuthRoutes(app: Express): void {
         return res.status(400).json({ error: result.error });
       }
 
+      logAuditFromRequest(req, "password_reset", "auth", undefined, { email }, "warning");
       return res.json({ success: true, message: "Password updated. You can now sign in with your new password." });
     } catch (err) {
       console.error("Password reset error:", err);
@@ -346,6 +354,7 @@ export function registerAuthRoutes(app: Express): void {
         return res.status(400).json({ error: result.error });
       }
 
+      logAuditFromRequest(req, "password_change", "auth", userId, {}, "warning");
       return res.json({ success: true, message: "Password changed successfully" });
     } catch (err) {
       console.error("Change password error:", err);
@@ -451,7 +460,10 @@ export function registerAuthRoutes(app: Express): void {
 
       if (validation.valid && validation.userId && !validation.requiresReauth) {
         if (validation.userId === 'admin') {
-          const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+          if (!process.env.ADMIN_USERNAME) {
+            return res.json({ authenticated: false });
+          }
+          const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
           const adminNumericId = await getOrCreateAdminUser(ADMIN_USERNAME).catch(() => null);
           req.session.isAuthenticated = true;
           req.session.username = ADMIN_USERNAME;
@@ -475,7 +487,7 @@ export function registerAuthRoutes(app: Express): void {
               res.cookie('device_token', refreshed.rawToken, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
-                sameSite: 'lax',
+                sameSite: 'strict',
                 maxAge: 60 * 24 * 60 * 60 * 1000,
                 path: '/',
               });
