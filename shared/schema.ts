@@ -1696,3 +1696,86 @@ export const aiSessionContext = pgTable("ai_session_context", {
 export const insertAiSessionContextSchema = createInsertSchema(aiSessionContext).omit({ id: true, lastUpdated: true });
 export type InsertAiSessionContext = z.infer<typeof insertAiSessionContextSchema>;
 export type AiSessionContext = typeof aiSessionContext.$inferSelect;
+
+// ─── 4D-OS Ecosystem Links ──────────────────────────────────────────────────
+export const ecosystemLinks = pgTable("ecosystem_links", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  externalUserId: varchar("external_user_id", { length: 255 }).notNull(),
+  platform: varchar("platform", { length: 100 }).notNull(),
+  accessTokenEncrypted: text("access_token_encrypted").notNull(),
+  refreshTokenEncrypted: text("refresh_token_encrypted"),
+  linkedAt: timestamp("linked_at").defaultNow().notNull(),
+});
+
+export const insertEcosystemLinkSchema = createInsertSchema(ecosystemLinks).omit({ id: true, linkedAt: true });
+export type InsertEcosystemLink = z.infer<typeof insertEcosystemLinkSchema>;
+export type EcosystemLink = typeof ecosystemLinks.$inferSelect;
+
+// ─── Synced Achievements ────────────────────────────────────────────────────
+export const syncedAchievements = pgTable("synced_achievements", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  achievementType: varchar("achievement_type", { length: 100 }).notNull(),
+  data: jsonb("data").notNull(),
+  synced: boolean("synced").default(false).notNull(),
+  syncedAt: timestamp("synced_at"),
+});
+
+export const insertSyncedAchievementSchema = createInsertSchema(syncedAchievements).omit({ id: true, syncedAt: true });
+export type InsertSyncedAchievement = z.infer<typeof insertSyncedAchievementSchema>;
+export type SyncedAchievement = typeof syncedAchievements.$inferSelect;
+
+// ─── Enriched Context Cache ─────────────────────────────────────────────────
+export const enrichedContextCache = pgTable("enriched_context_cache", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  contextData: jsonb("context_data").notNull(),
+  fetchedAt: timestamp("fetched_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+export const insertEnrichedContextCacheSchema = createInsertSchema(enrichedContextCache).omit({ id: true, fetchedAt: true });
+export type InsertEnrichedContextCache = z.infer<typeof insertEnrichedContextCacheSchema>;
+export type EnrichedContextCache = typeof enrichedContextCache.$inferSelect;
+
+// ─── Emotional Snapshots ────────────────────────────────────────────────────
+export const emotionalSnapshots = pgTable("emotional_snapshots", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  emotion: varchar("emotion", { length: 50 }).notNull(),
+  intensity: real("intensity").notNull(),
+  source: varchar("source", { length: 100 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertEmotionalSnapshotSchema = createInsertSchema(emotionalSnapshots).omit({ id: true, createdAt: true });
+export type InsertEmotionalSnapshot = z.infer<typeof insertEmotionalSnapshotSchema>;
+export type EmotionalSnapshot = typeof emotionalSnapshots.$inferSelect;
+
+// ─── Emotion-Prediction Correlation ─────────────────────────────────────────
+export const emotionPredictionCorrelation = pgTable("emotion_prediction_correlation", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  emotionAtPrediction: varchar("emotion_at_prediction", { length: 50 }).notNull(),
+  predictionId: integer("prediction_id").references(() => predictions.id).notNull(),
+  outcome: varchar("outcome", { length: 20 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertEmotionPredictionCorrelationSchema = createInsertSchema(emotionPredictionCorrelation).omit({ id: true, createdAt: true });
+export type InsertEmotionPredictionCorrelation = z.infer<typeof insertEmotionPredictionCorrelationSchema>;
+export type EmotionPredictionCorrelation = typeof emotionPredictionCorrelation.$inferSelect;
+
+// ─── Cool-Down Events ───────────────────────────────────────────────────────
+export const coolDownEvents = pgTable("cool_down_events", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").references(() => users.id).notNull(),
+  triggeredAt: timestamp("triggered_at").defaultNow().notNull(),
+  reason: text("reason").notNull(),
+  durationMinutes: integer("duration_minutes").notNull(),
+});
+
+export const insertCoolDownEventSchema = createInsertSchema(coolDownEvents).omit({ id: true, triggeredAt: true });
+export type InsertCoolDownEvent = z.infer<typeof insertCoolDownEventSchema>;
+export type CoolDownEvent = typeof coolDownEvents.$inferSelect;

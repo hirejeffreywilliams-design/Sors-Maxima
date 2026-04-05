@@ -58,6 +58,18 @@ export {
   insertBetBackupSchema,
   insertOddsSnapshotSchema,
   insertTaxRecordSchema,
+  ecosystemLinks,
+  insertEcosystemLinkSchema,
+  syncedAchievements,
+  insertSyncedAchievementSchema,
+  enrichedContextCache,
+  insertEnrichedContextCacheSchema,
+  emotionalSnapshots,
+  insertEmotionalSnapshotSchema,
+  emotionPredictionCorrelation,
+  insertEmotionPredictionCorrelationSchema,
+  coolDownEvents,
+  insertCoolDownEventSchema,
 } from "@shared/schema";
 
 export type {
@@ -89,6 +101,18 @@ export type {
   OddsSnapshot,
   InsertTaxRecord,
   TaxRecord,
+  InsertEcosystemLink,
+  EcosystemLink,
+  InsertSyncedAchievement,
+  SyncedAchievement,
+  InsertEnrichedContextCache,
+  EnrichedContextCache,
+  InsertEmotionalSnapshot,
+  EmotionalSnapshot,
+  InsertEmotionPredictionCorrelation,
+  EmotionPredictionCorrelation,
+  InsertCoolDownEvent,
+  CoolDownEvent,
 } from "@shared/schema";
 
 export const tradingCards = pgTable("trading_cards", {
