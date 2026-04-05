@@ -167,7 +167,7 @@ The documented 55.9% win rate is the most powerful marketing asset in the sports
 
 **Data Compounding Moat:** Every settled pick improves the Quantum Fusion Engine. The platform that has been learning the longest has the deepest training dataset and therefore the most calibrated model. Sors Maxima's Autonomous Learning Engine creates a data advantage that grows exponentially with time — a true first-mover data moat.
 
-**Methodology Depth Moat:** Building a genuine 46-factor Quantum Fusion Engine requires substantial engineering investment. The 229,746-line production codebase represents 3–5 years of equivalent full-time engineering work. A competitor starting today cannot replicate this overnight.
+**Methodology Depth Moat:** Building a genuine 46-factor Quantum Fusion Engine requires substantial engineering investment. The 230,747-line production codebase represents 3–5 years of equivalent full-time engineering work. A competitor starting today cannot replicate this overnight.
 
 **Performance Track Record Moat:** Building a verifiable track record of 987+ settled picks takes time. A competitor launching tomorrow starts at zero. Sors Maxima's documented performance history is a non-replicable competitive asset.
 

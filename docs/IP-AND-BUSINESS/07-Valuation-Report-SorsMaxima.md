@@ -20,7 +20,7 @@ This valuation report is prepared for internal IP documentation and investor com
 ## EXECUTIVE SUMMARY
 
 **Platform:** Sors Maxima — Sports Button (46-Factor Quantum Fusion Engine)
-**Stage:** Working production platform — 229,746 lines of code
+**Stage:** Working production platform — 230,747 lines of code
 **Performance:** 55.9% win rate across 987+ settled picks (break-even: 52.4%)
 **IP:** Patent Pending (PPA filed April 4, 2026), Trademarks filed
 
@@ -34,7 +34,7 @@ This valuation report is prepared for internal IP documentation and investor com
 | **Concluded Fair Market Value Range** | **$18M – $50M** |
 | **Midpoint Estimate** | **$30M** |
 
-The $30M midpoint reflects the platform's compelling combination of a massive addressable market, a documented performance track record (55.9% win rate), a proprietary 46-factor AI architecture with patent protection, and a fully deployed production codebase of 229,746 lines.
+The $30M midpoint reflects the platform's compelling combination of a massive addressable market, a documented performance track record (55.9% win rate), a proprietary 46-factor AI architecture with patent protection, and a fully deployed production codebase of 230,747 lines.
 
 ---
 
@@ -66,7 +66,7 @@ For pre-revenue sports AI platforms with strong IP and documented performance da
 
 **Upward Factors Supporting High End of Range ($40M–$50M):**
 1. **Documented win rate:** 55.9% across 987+ picks is verifiable, credible proof of concept that most competitors cannot match
-2. **Platform scale:** 229,746 lines of production code across 60+ engine modules — a substantial engineering asset
+2. **Platform scale:** 230,747 lines of production code across 60+ engine modules — a substantial engineering asset
 3. **Market size:** $7.5B sports prediction intelligence market growing at 22% CAGR
 4. **IP protection:** Patent pending for the Quantum Fusion Engine architecture; trademarks filed
 5. **Technology breadth:** 8 sports, 6 international soccer leagues, 46 factors — comprehensive coverage
@@ -112,7 +112,7 @@ For pre-revenue sports AI platforms with strong IP and documented performance da
 
 | Asset | Estimated Value |
 |---|---|
-| Production codebase (229,746 LOC) | $2.5M – $4.5M (at $11–$20/LOC for AI sports platform) |
+| Production codebase (230,747 LOC) | $2.5M – $4.5M (at $11–$20/LOC for AI sports platform) |
 | Quantum Fusion Engine design and architecture | $1M – $2M |
 | 46-factor data model and weighting system | $500K – $1M |
 | Monte Carlo simulation infrastructure | $300K – $600K |
@@ -153,7 +153,7 @@ Every settled pick improves the Quantum Fusion Engine. At 987+ picks, the model 
 
 ### Driver 3: The Market Timing
 
-Post-PASPA, the US legal sports betting market is in the fastest growth phase of its history. Platforms that establish brand recognition and user loyalty during this growth phase will capture disproportionate long-term market share. Sors Maxima is deploying its 229,746-line production platform at the optimal moment in market development.
+Post-PASPA, the US legal sports betting market is in the fastest growth phase of its history. Platforms that establish brand recognition and user loyalty during this growth phase will capture disproportionate long-term market share. Sors Maxima is deploying its 230,747-line production platform at the optimal moment in market development.
 
 ### Driver 4: The Sports Betting Media Acquisition Premium
 

@@ -109,13 +109,13 @@ This is not hypothetical. This is 987+ settled picks of documented history.
 - **Trademarks:** SORS MAXIMA™, QUANTUM FUSION ENGINE™, SPORTS BUTTON™, SHARP MONEY FLOW™, 46-FACTOR ANALYSIS™
 - **Self-Improving Algorithm:** 987+ picks in training data. The model gets better with every game — competitors starting today are already behind.
 - **Algorithm Protection:** Proprietary protection mechanisms prevent factor weight reverse-engineering
-- **229,746 Lines of Production Code:** The platform is built. It's deployed. It works.
+- **230,747 Lines of Production Code:** The platform is built. It's deployed. It works.
 
 ---
 
 ## TRACTION
 
-- ✅ 229,746 lines of production code — fully deployed
+- ✅ 230,747 lines of production code — fully deployed
 - ✅ **55.9% win rate** across 987+ settled picks
 - ✅ Patent Pending (April 4, 2026)
 - ✅ 8 sports, 14 leagues fully integrated
@@ -136,7 +136,7 @@ Based on comparable sports intelligence acquisitions (Action Network: $240M, Sec
 
 **Jeffrey W. Williams** — Founder, CEO, Lead Engineer, Jeffrey W. Williams LLC
 
-Full-stack creator of the Sors Maxima Sports Button platform — 229,746 lines of production TypeScript code. Also founder of the OmniDLOS Holdings ecosystem (multiple AI platforms across wellness, health, gaming, and sports verticals).
+Full-stack creator of the Sors Maxima Sports Button platform — 230,747 lines of production TypeScript code. Also founder of the OmniDLOS Holdings ecosystem (multiple AI platforms across wellness, health, gaming, and sports verticals).
 
 **Email:** hirejeffreywilliams@gmail.com
 

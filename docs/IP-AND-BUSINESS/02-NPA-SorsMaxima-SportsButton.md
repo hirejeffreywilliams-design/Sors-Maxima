@@ -89,7 +89,7 @@ The Sors Maxima Sports Button platform is deployed as a server-side application 
 
 #### B. Codebase Overview
 
-The platform comprises 229,746 lines of production code organized into:
+The platform comprises 230,747 lines of production code organized into:
 - Core engine modules (quantumFusionEngine.ts and associated engines)
 - Data provider modules (sport-specific external API integrations)
 - Analytics and intelligence modules (AI explainer, analyst context, analytics agent)
@@ -354,7 +354,7 @@ an administrative intelligence layer comprising autonomousAdminIntelligence and 
 
 ## ABSTRACT
 
-A multi-factor Quantum Fusion Engine for AI-driven sports intelligence and prediction processes 46 analytical factors across eight categories — Core Betting Analysis (12 factors), Advanced Analytics (9 factors), Psychological Factors (6 factors), Physical and Health Factors (4 factors), Performance Metrics (1 factor), Environmental Factors (4 factors), Market Dynamics Factors (8 factors), and Financial and Regulatory Factors (2 factors) — simultaneously for sporting events across NBA, NHL, NCAAB, UFC, soccer, MLB, NFL, and NCAAF. A Monte Carlo Simulation Engine executes 10,000 real-time and 100,000 nightly simulations per game. An Autonomous Learning Engine continuously updates sport-specific factor weights through Brier Score calibration and attribution analysis of 987+ settled picks. A Calibration Engine, Backtest Engine, and A/B Test Engine provide systematic validation infrastructure. An Accelerated Pattern Engine identifies significant historical patterns. Algorithm protection and Community Integrity Engine maintain platform trustworthiness. Production-deployed as the Sors Maxima Sports Button — quantumFusionEngine.ts, autonomousLearningEngine.ts, acceleratedPatternEngine.ts, calibrationEngine.ts, abTestEngine.ts, backtestEngine.ts, communityIntegrityEngine.ts, algorithmProtection.ts — comprising 229,746 lines of code.
+A multi-factor Quantum Fusion Engine for AI-driven sports intelligence and prediction processes 46 analytical factors across eight categories — Core Betting Analysis (12 factors), Advanced Analytics (9 factors), Psychological Factors (6 factors), Physical and Health Factors (4 factors), Performance Metrics (1 factor), Environmental Factors (4 factors), Market Dynamics Factors (8 factors), and Financial and Regulatory Factors (2 factors) — simultaneously for sporting events across NBA, NHL, NCAAB, UFC, soccer, MLB, NFL, and NCAAF. A Monte Carlo Simulation Engine executes 10,000 real-time and 100,000 nightly simulations per game. An Autonomous Learning Engine continuously updates sport-specific factor weights through Brier Score calibration and attribution analysis of 987+ settled picks. A Calibration Engine, Backtest Engine, and A/B Test Engine provide systematic validation infrastructure. An Accelerated Pattern Engine identifies significant historical patterns. Algorithm protection and Community Integrity Engine maintain platform trustworthiness. Production-deployed as the Sors Maxima Sports Button — quantumFusionEngine.ts, autonomousLearningEngine.ts, acceleratedPatternEngine.ts, calibrationEngine.ts, abTestEngine.ts, backtestEngine.ts, communityIntegrityEngine.ts, algorithmProtection.ts — comprising 230,747 lines of code.
 
 ---
 
