@@ -417,3 +417,143 @@ Key administrative routes:
 *© 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.*
 *CONFIDENTIAL — Owner Eyes Only*
 *OmniDLOS Holdings Ecosystem*
+
+---
+
+## OMNISCRIPT ARCHITECTURE INTEGRATION
+
+> © 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.
+
+### OmniScript as the Cognitive Layer of Sors Maxima Sports Betting Intelligence Platform
+
+**Sors Maxima Sports Betting Intelligence Platform** is architected on **OmniScript** — the proprietary domain-specific language (`.omni`) of the OmniDLOS ecosystem. OmniScript compiles to an optimized TypeScript/JavaScript runtime and serves as the Cognitive Layer through which all platform computation, communication, and data persistence is expressed.
+
+#### OmniScript System Architecture
+
+```
+Sors Maxima Sports Betting Intelligence Platform — OmniScript Architecture
+├── universe SportsIntelligenceUniverse/
+│   ├── engine BettingPredictionEngine.omni          ← Primary computation engine
+│   ├── engine MonteCarloSimulationEngine.omni              ← Supporting engine
+│   ├── engine OddsArbitrageEngine.omni                     ← Supporting engine
+│   ├── engine LifeChangerTicketEngine.omni                 ← Supporting engine
+│   ├── service FactorModelService.omni                      ← Service layer
+│   ├── service OddsAggregationService.omni                  ← Service layer
+│   ├── service IntelligenceCardService.omni                 ← Service layer
+│   ├── portals/                               ← Nexus Point declarations
+│   │   ├── open-portals.omni                  ← REST API (Open Portal) endpoints
+│   │   └── pulse-channels.omni               ← WebSocket (Pulse Channel) connections
+│   └── vaults/                               ← Data Vault schemas
+│       ├── primary.vault.omni                 ← Primary data vault
+│       └── archive.vault.omni                 ← Immutable legacy archive
+├── omni.manifest                              ← OmniVault package manifest
+└── .omnirc                                    ← OmniScript runtime configuration
+```
+
+#### OmniScript Engine Declarations
+
+Each major subsystem of Sors Maxima Sports Betting Intelligence Platform is declared as an OmniScript `engine` — a typed, composable computation unit registered in the OmniVault package registry:
+
+| Engine | Role | OmniScript Pattern |
+|---|---|---|
+| `BettingPredictionEngine` | Primary computation — implements the core patented algorithm | `engine BettingPredictionEngine implements Intelligent` |
+| `MonteCarloSimulationEngine` | Supporting computation unit | `engine MonteCarloSimulationEngine` |
+| `OddsArbitrageEngine` | Supporting computation unit | `engine OddsArbitrageEngine` |
+| `LifeChangerTicketEngine` | Supporting computation unit | `engine LifeChangerTicketEngine` |
+
+#### Nexus Point Architecture (OmniDLOS API Layer)
+
+All external integrations are declared as **Nexus Points** in OmniScript — the proprietary OmniDLOS term for API interfaces:
+
+| Nexus Point Type | OmniScript Declaration | Usage |
+|---|---|---|
+| Open Portal (REST) | `portal OpenPortal<SorsAPI>` | Standard HTTP/REST communication |
+| Pulse Channel (WebSocket) | `pulse PulseChannel<LiveFeed>` | Real-time bidirectional data streaming |
+| Forge Link (internal RPC) | `portal ForgeLink<InternalBus>` | High-speed typed inter-service communication |
+| Echo Signal (Webhook) | `portal EchoSignal<EventHook>` | Outbound event notification system |
+
+#### Guardian Layer Security Model
+
+All sensitive operations in Sors Maxima Sports Betting Intelligence Platform are protected by OmniScript's **Guardian Layer** decorator system:
+
+```omni
+// Guardian Layer access control
+@Guardian(level: 5)         // Requires clearance level 5 of 10
+@Dimension(Dimension.TEMPORAL)
+@Audit(trail: AuditTrail.FULL)
+manifest flow sensitiveScoringOperation(userId: Text): flow<SecureResult> {
+  // Operation protected by Guardian Layer — unauthorized access raises QuantumFault
+}
+```
+
+| Guardian Level | Access Tier | Applied To |
+|---|---|---|
+| Level 1–2 | Public Nexus Points | Open data read operations |
+| Level 3–4 | Authenticated user operations | Profile reads, standard queries |
+| Level 5–6 | Premium / verified operations | Core algorithm execution |
+| Level 7–8 | Admin operations | Configuration changes, data exports |
+| Level 9–10 | Owner / root operations | Vault management, Guardian administration |
+
+#### Cross-Dimensional Bus Integration
+
+Sors Maxima Sports Betting Intelligence Platform participates in the OmniDLOS **Inter-Dimensional Bus** (`Nova.Bus`) — enabling real-time Signal exchange with all 12 other OmniDLOS platforms:
+
+```omni
+// Emit a Signal to the cross-dimensional bus
+Nova.Bus.emit("platform.event.type", {
+  platformId: "Sors-Maxima",
+  universe: "SportsIntelligenceUniverse",
+  dimension: Dimension.TEMPORAL,
+  payload: eventData
+})
+
+// Receive Signals from other dimensions
+drift signal in Nova.Bus.receive(channel: "cross-dimensional") {
+  when (signal.dimension == Dimension.TEMPORAL) {
+    handleIncomingSignal(signal)
+  }
+}
+```
+
+#### OmniScript Code Sample — Core Engine
+
+```omni
+// Sors Maxima — 46-Factor Betting Prediction Engine
+universe SportsIntelligenceUniverse {
+  dimension: Dimension.TEMPORAL
+  vibe: Vibe.PRECISION
+
+  forge FACTOR_COUNT: Integer = 46
+  forge SIMULATION_RUNS: Integer = 10_000
+  forge MIN_EV_THRESHOLD: Float = 3.5
+  forge CALIBRATION_WINDOW: Integer = 90  // days
+
+  engine BettingPredictionEngine implements Intelligent {
+    manifest flow analyzMatchup(homeTeam: Text, awayTeam: Text, market: Text): flow<Prediction> {
+      forge factors    = sync FactorModelService.computeAll(homeTeam, awayTeam, FACTOR_COUNT)
+      forge simulation = sync MonteCarloSimulationEngine.run(factors, runs: SIMULATION_RUNS)
+      forge odds       = sync OddsAggregationService.fetch(homeTeam, awayTeam, market)
+
+      forge ev: Float = simulation.expectedValue(odds)
+      forge confidence: Probability = simulation.confidenceInterval(0.95)
+
+      when (ev >= MIN_EV_THRESHOLD) {
+        Nova.Bus.emit("pick.high-ev", { matchup: `${homeTeam} vs ${awayTeam}`, ev, confidence })
+      }
+
+      propagate Prediction { factors, simulation, odds, ev, confidence }
+    }
+
+    manifest flow generateLifeChangerTicket(date: Chronicle): flow<ParlayTicket> {
+      forge picks = sync BettingPredictionEngine.getDailyBestPicks(date, minOdds: 1000)
+      forge ticket = sync LifeChangerTicketEngine.compose(picks)
+      Nova.Vault.archive("life-changer-ticket", ticket)
+      propagate ticket
+    }
+  }
+}
+```
+
+© 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.
+
+---

@@ -1,0 +1,782 @@
+// Sors Maxima/omniscript/services.omni
+// Service Declarations — The Predictive Dimension
+// © 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.
+// CONFIDENTIAL — Owner Eyes Only.
+
+draw { Nova } from "nova:std"
+draw { Signal, Status, Priority, Timestamp, Duration } from "nova:std/types"
+draw { Service, RequestContext, QueryFilter } from "nova:std/service"
+draw { DataVault } from "nova:std/data"
+
+
+/// End-to-end Quantum Projection orchestration pipeline
+@service(
+  id: "predictionpipelin-svc",
+  platform: "Sors-Maxima",
+  shield: ShieldLevel.MAXIMUM
+)
+service PredictionPipelineService {
+
+  @inject forge vault: DataVault<Any>
+  @inject forge auth: Nova.Auth
+  @inject forge bus: Nova.Bus
+
+  @portal(endpoint: "sors-maxima.predictionpipeline.get")
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: StandardRequestSchema)
+  manifest getAll(
+    ctx:    RequestContext,
+    filter: QueryFilter?
+  ): flow<Constellation<Any>> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge results = sync this.vault.query({
+      owner:  identity.userId,
+      filter: filter ?? QueryFilter.none(),
+      limit:  100
+    })
+
+    Nova.Metrics.pulse("sors-maxima.predictionpipelineservice.get", 1.0)
+    propagate results
+  }
+
+  @portal(endpoint: "sors-maxima.predictionpipeline.create")
+  @audit
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: CreateRequestSchema)
+  manifest create(
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge entry = sync this.vault.store({
+      ...input,
+      id:        Nova.Crypto.uuid(),
+      ownerId:   identity.userId,
+      createdAt: Timestamp.now(),
+      status:    Status.ACTIVE
+    })
+
+    // Broadcast creation signal via IDB
+    Nova.Bus.emit("sors-maxima.predictionpipeline.created", Signal {
+      topic:   "sors-maxima.predictionpipeline.created",
+      payload: { entryId: entry.id, userId: identity.userId },
+      origin:  "sors-maxima",
+      priority: Priority.NORMAL
+    })
+
+    Nova.Metrics.pulse("sors-maxima.predictionpipelineservice.create", 1.0)
+    propagate entry
+  }
+
+  @portal(endpoint: "sors-maxima.predictionpipeline.update")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest update(
+    id:    Text,
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+    forge existing = sync this.vault.get(id)
+    when (existing == nil) {
+      fault ResourceNotFound { resource: "PredictionPipeline", id }
+    }
+
+    forge updated = sync this.vault.update(id, {
+      ...input,
+      updatedAt: Timestamp.now(),
+      updatedBy: identity.userId
+    })
+
+    propagate updated
+  }
+
+  @portal(endpoint: "sors-maxima.predictionpipeline.delete")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest dissolve(id: Text, ctx: RequestContext): flow<nil> {
+    forge identity = sync this.auth.verify(ctx)
+    sync this.vault.softDelete(id, identity.userId)
+    Nova.Metrics.pulse("sors-maxima.predictionpipelineservice.delete", 1.0)
+    propagate nil
+  }
+}
+
+/// Automated resolution of Dimensional Wagers post-event
+@service(
+  id: "settlement-svc",
+  platform: "Sors-Maxima",
+  shield: ShieldLevel.HIGH
+)
+service SettlementService {
+
+  @inject forge vault: DataVault<Any>
+  @inject forge auth: Nova.Auth
+  @inject forge bus: Nova.Bus
+
+  @portal(endpoint: "sors-maxima.settlement.get")
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: StandardRequestSchema)
+  manifest getAll(
+    ctx:    RequestContext,
+    filter: QueryFilter?
+  ): flow<Constellation<Any>> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge results = sync this.vault.query({
+      owner:  identity.userId,
+      filter: filter ?? QueryFilter.none(),
+      limit:  100
+    })
+
+    Nova.Metrics.pulse("sors-maxima.settlementservice.get", 1.0)
+    propagate results
+  }
+
+  @portal(endpoint: "sors-maxima.settlement.create")
+  @audit
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: CreateRequestSchema)
+  manifest create(
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge entry = sync this.vault.store({
+      ...input,
+      id:        Nova.Crypto.uuid(),
+      ownerId:   identity.userId,
+      createdAt: Timestamp.now(),
+      status:    Status.ACTIVE
+    })
+
+    // Broadcast creation signal via IDB
+    Nova.Bus.emit("sors-maxima.settlement.created", Signal {
+      topic:   "sors-maxima.settlement.created",
+      payload: { entryId: entry.id, userId: identity.userId },
+      origin:  "sors-maxima",
+      priority: Priority.NORMAL
+    })
+
+    Nova.Metrics.pulse("sors-maxima.settlementservice.create", 1.0)
+    propagate entry
+  }
+
+  @portal(endpoint: "sors-maxima.settlement.update")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest update(
+    id:    Text,
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+    forge existing = sync this.vault.get(id)
+    when (existing == nil) {
+      fault ResourceNotFound { resource: "Settlement", id }
+    }
+
+    forge updated = sync this.vault.update(id, {
+      ...input,
+      updatedAt: Timestamp.now(),
+      updatedBy: identity.userId
+    })
+
+    propagate updated
+  }
+
+  @portal(endpoint: "sors-maxima.settlement.delete")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest dissolve(id: Text, ctx: RequestContext): flow<nil> {
+    forge identity = sync this.auth.verify(ctx)
+    sync this.vault.softDelete(id, identity.userId)
+    Nova.Metrics.pulse("sors-maxima.settlementservice.delete", 1.0)
+    propagate nil
+  }
+}
+
+/// Responsible gambling monitoring and intervention system
+@service(
+  id: "wagerguardian-svc",
+  platform: "Sors-Maxima",
+  shield: ShieldLevel.HIGH
+)
+service WagerGuardianService {
+
+  @inject forge vault: DataVault<Any>
+  @inject forge auth: Nova.Auth
+  @inject forge bus: Nova.Bus
+
+  @portal(endpoint: "sors-maxima.wagerguardian.get")
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: StandardRequestSchema)
+  manifest getAll(
+    ctx:    RequestContext,
+    filter: QueryFilter?
+  ): flow<Constellation<Any>> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge results = sync this.vault.query({
+      owner:  identity.userId,
+      filter: filter ?? QueryFilter.none(),
+      limit:  100
+    })
+
+    Nova.Metrics.pulse("sors-maxima.wagerguardianservice.get", 1.0)
+    propagate results
+  }
+
+  @portal(endpoint: "sors-maxima.wagerguardian.create")
+  @audit
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: CreateRequestSchema)
+  manifest create(
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge entry = sync this.vault.store({
+      ...input,
+      id:        Nova.Crypto.uuid(),
+      ownerId:   identity.userId,
+      createdAt: Timestamp.now(),
+      status:    Status.ACTIVE
+    })
+
+    // Broadcast creation signal via IDB
+    Nova.Bus.emit("sors-maxima.wagerguardian.created", Signal {
+      topic:   "sors-maxima.wagerguardian.created",
+      payload: { entryId: entry.id, userId: identity.userId },
+      origin:  "sors-maxima",
+      priority: Priority.NORMAL
+    })
+
+    Nova.Metrics.pulse("sors-maxima.wagerguardianservice.create", 1.0)
+    propagate entry
+  }
+
+  @portal(endpoint: "sors-maxima.wagerguardian.update")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest update(
+    id:    Text,
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+    forge existing = sync this.vault.get(id)
+    when (existing == nil) {
+      fault ResourceNotFound { resource: "WagerGuardian", id }
+    }
+
+    forge updated = sync this.vault.update(id, {
+      ...input,
+      updatedAt: Timestamp.now(),
+      updatedBy: identity.userId
+    })
+
+    propagate updated
+  }
+
+  @portal(endpoint: "sors-maxima.wagerguardian.delete")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest dissolve(id: Text, ctx: RequestContext): flow<nil> {
+    forge identity = sync this.auth.verify(ctx)
+    sync this.vault.softDelete(id, identity.userId)
+    Nova.Metrics.pulse("sors-maxima.wagerguardianservice.delete", 1.0)
+    propagate nil
+  }
+}
+
+/// Real-time Signal Event data ingestion from ESPN and partners
+@service(
+  id: "livesportsdata-svc",
+  platform: "Sors-Maxima",
+  shield: ShieldLevel.STANDARD
+)
+service LiveSportsDataService {
+
+  @inject forge vault: DataVault<Any>
+  @inject forge auth: Nova.Auth
+  @inject forge bus: Nova.Bus
+
+  @portal(endpoint: "sors-maxima.livesportsdata.get")
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: StandardRequestSchema)
+  manifest getAll(
+    ctx:    RequestContext,
+    filter: QueryFilter?
+  ): flow<Constellation<Any>> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge results = sync this.vault.query({
+      owner:  identity.userId,
+      filter: filter ?? QueryFilter.none(),
+      limit:  100
+    })
+
+    Nova.Metrics.pulse("sors-maxima.livesportsdataservice.get", 1.0)
+    propagate results
+  }
+
+  @portal(endpoint: "sors-maxima.livesportsdata.create")
+  @audit
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: CreateRequestSchema)
+  manifest create(
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge entry = sync this.vault.store({
+      ...input,
+      id:        Nova.Crypto.uuid(),
+      ownerId:   identity.userId,
+      createdAt: Timestamp.now(),
+      status:    Status.ACTIVE
+    })
+
+    // Broadcast creation signal via IDB
+    Nova.Bus.emit("sors-maxima.livesportsdata.created", Signal {
+      topic:   "sors-maxima.livesportsdata.created",
+      payload: { entryId: entry.id, userId: identity.userId },
+      origin:  "sors-maxima",
+      priority: Priority.NORMAL
+    })
+
+    Nova.Metrics.pulse("sors-maxima.livesportsdataservice.create", 1.0)
+    propagate entry
+  }
+
+  @portal(endpoint: "sors-maxima.livesportsdata.update")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest update(
+    id:    Text,
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+    forge existing = sync this.vault.get(id)
+    when (existing == nil) {
+      fault ResourceNotFound { resource: "LiveSportsData", id }
+    }
+
+    forge updated = sync this.vault.update(id, {
+      ...input,
+      updatedAt: Timestamp.now(),
+      updatedBy: identity.userId
+    })
+
+    propagate updated
+  }
+
+  @portal(endpoint: "sors-maxima.livesportsdata.delete")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest dissolve(id: Text, ctx: RequestContext): flow<nil> {
+    forge identity = sync this.auth.verify(ctx)
+    sync this.vault.softDelete(id, identity.userId)
+    Nova.Metrics.pulse("sors-maxima.livesportsdataservice.delete", 1.0)
+    propagate nil
+  }
+}
+
+/// Push Signal Alerts for high-confidence Quantum Projections
+@service(
+  id: "notification-svc",
+  platform: "Sors-Maxima",
+  shield: ShieldLevel.STANDARD
+)
+service NotificationService {
+
+  @inject forge vault: DataVault<Any>
+  @inject forge auth: Nova.Auth
+  @inject forge bus: Nova.Bus
+
+  @portal(endpoint: "sors-maxima.notification.get")
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: StandardRequestSchema)
+  manifest getAll(
+    ctx:    RequestContext,
+    filter: QueryFilter?
+  ): flow<Constellation<Any>> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge results = sync this.vault.query({
+      owner:  identity.userId,
+      filter: filter ?? QueryFilter.none(),
+      limit:  100
+    })
+
+    Nova.Metrics.pulse("sors-maxima.notificationservice.get", 1.0)
+    propagate results
+  }
+
+  @portal(endpoint: "sors-maxima.notification.create")
+  @audit
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: CreateRequestSchema)
+  manifest create(
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge entry = sync this.vault.store({
+      ...input,
+      id:        Nova.Crypto.uuid(),
+      ownerId:   identity.userId,
+      createdAt: Timestamp.now(),
+      status:    Status.ACTIVE
+    })
+
+    // Broadcast creation signal via IDB
+    Nova.Bus.emit("sors-maxima.notification.created", Signal {
+      topic:   "sors-maxima.notification.created",
+      payload: { entryId: entry.id, userId: identity.userId },
+      origin:  "sors-maxima",
+      priority: Priority.NORMAL
+    })
+
+    Nova.Metrics.pulse("sors-maxima.notificationservice.create", 1.0)
+    propagate entry
+  }
+
+  @portal(endpoint: "sors-maxima.notification.update")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest update(
+    id:    Text,
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+    forge existing = sync this.vault.get(id)
+    when (existing == nil) {
+      fault ResourceNotFound { resource: "Notification", id }
+    }
+
+    forge updated = sync this.vault.update(id, {
+      ...input,
+      updatedAt: Timestamp.now(),
+      updatedBy: identity.userId
+    })
+
+    propagate updated
+  }
+
+  @portal(endpoint: "sors-maxima.notification.delete")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest dissolve(id: Text, ctx: RequestContext): flow<nil> {
+    forge identity = sync this.auth.verify(ctx)
+    sync this.vault.softDelete(id, identity.userId)
+    Nova.Metrics.pulse("sors-maxima.notificationservice.delete", 1.0)
+    propagate nil
+  }
+}
+
+/// Intelligence metrics and platform performance reporting
+@service(
+  id: "analyticsagent-svc",
+  platform: "Sors-Maxima",
+  shield: ShieldLevel.STANDARD
+)
+service AnalyticsAgentService {
+
+  @inject forge vault: DataVault<Any>
+  @inject forge auth: Nova.Auth
+  @inject forge bus: Nova.Bus
+
+  @portal(endpoint: "sors-maxima.analyticsagent.get")
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: StandardRequestSchema)
+  manifest getAll(
+    ctx:    RequestContext,
+    filter: QueryFilter?
+  ): flow<Constellation<Any>> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge results = sync this.vault.query({
+      owner:  identity.userId,
+      filter: filter ?? QueryFilter.none(),
+      limit:  100
+    })
+
+    Nova.Metrics.pulse("sors-maxima.analyticsagentservice.get", 1.0)
+    propagate results
+  }
+
+  @portal(endpoint: "sors-maxima.analyticsagent.create")
+  @audit
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: CreateRequestSchema)
+  manifest create(
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge entry = sync this.vault.store({
+      ...input,
+      id:        Nova.Crypto.uuid(),
+      ownerId:   identity.userId,
+      createdAt: Timestamp.now(),
+      status:    Status.ACTIVE
+    })
+
+    // Broadcast creation signal via IDB
+    Nova.Bus.emit("sors-maxima.analyticsagent.created", Signal {
+      topic:   "sors-maxima.analyticsagent.created",
+      payload: { entryId: entry.id, userId: identity.userId },
+      origin:  "sors-maxima",
+      priority: Priority.NORMAL
+    })
+
+    Nova.Metrics.pulse("sors-maxima.analyticsagentservice.create", 1.0)
+    propagate entry
+  }
+
+  @portal(endpoint: "sors-maxima.analyticsagent.update")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest update(
+    id:    Text,
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+    forge existing = sync this.vault.get(id)
+    when (existing == nil) {
+      fault ResourceNotFound { resource: "AnalyticsAgent", id }
+    }
+
+    forge updated = sync this.vault.update(id, {
+      ...input,
+      updatedAt: Timestamp.now(),
+      updatedBy: identity.userId
+    })
+
+    propagate updated
+  }
+
+  @portal(endpoint: "sors-maxima.analyticsagent.delete")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest dissolve(id: Text, ctx: RequestContext): flow<nil> {
+    forge identity = sync this.auth.verify(ctx)
+    sync this.vault.softDelete(id, identity.userId)
+    Nova.Metrics.pulse("sors-maxima.analyticsagentservice.delete", 1.0)
+    propagate nil
+  }
+}
+
+/// Pre-computation of high-traffic Signal Event predictions
+@service(
+  id: "prefetchschedul-svc",
+  platform: "Sors-Maxima",
+  shield: ShieldLevel.STANDARD
+)
+service PrefetchSchedulerService {
+
+  @inject forge vault: DataVault<Any>
+  @inject forge auth: Nova.Auth
+  @inject forge bus: Nova.Bus
+
+  @portal(endpoint: "sors-maxima.prefetchscheduler.get")
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: StandardRequestSchema)
+  manifest getAll(
+    ctx:    RequestContext,
+    filter: QueryFilter?
+  ): flow<Constellation<Any>> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge results = sync this.vault.query({
+      owner:  identity.userId,
+      filter: filter ?? QueryFilter.none(),
+      limit:  100
+    })
+
+    Nova.Metrics.pulse("sors-maxima.prefetchschedulerservice.get", 1.0)
+    propagate results
+  }
+
+  @portal(endpoint: "sors-maxima.prefetchscheduler.create")
+  @audit
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: CreateRequestSchema)
+  manifest create(
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge entry = sync this.vault.store({
+      ...input,
+      id:        Nova.Crypto.uuid(),
+      ownerId:   identity.userId,
+      createdAt: Timestamp.now(),
+      status:    Status.ACTIVE
+    })
+
+    // Broadcast creation signal via IDB
+    Nova.Bus.emit("sors-maxima.prefetchscheduler.created", Signal {
+      topic:   "sors-maxima.prefetchscheduler.created",
+      payload: { entryId: entry.id, userId: identity.userId },
+      origin:  "sors-maxima",
+      priority: Priority.NORMAL
+    })
+
+    Nova.Metrics.pulse("sors-maxima.prefetchschedulerservice.create", 1.0)
+    propagate entry
+  }
+
+  @portal(endpoint: "sors-maxima.prefetchscheduler.update")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest update(
+    id:    Text,
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+    forge existing = sync this.vault.get(id)
+    when (existing == nil) {
+      fault ResourceNotFound { resource: "PrefetchScheduler", id }
+    }
+
+    forge updated = sync this.vault.update(id, {
+      ...input,
+      updatedAt: Timestamp.now(),
+      updatedBy: identity.userId
+    })
+
+    propagate updated
+  }
+
+  @portal(endpoint: "sors-maxima.prefetchscheduler.delete")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest dissolve(id: Text, ctx: RequestContext): flow<nil> {
+    forge identity = sync this.auth.verify(ctx)
+    sync this.vault.softDelete(id, identity.userId)
+    Nova.Metrics.pulse("sors-maxima.prefetchschedulerservice.delete", 1.0)
+    propagate nil
+  }
+}
+
+/// Re-engagement workflows for dormant Dimensional Citizens
+@service(
+  id: "retentionsequen-svc",
+  platform: "Sors-Maxima",
+  shield: ShieldLevel.STANDARD
+)
+service RetentionSequenceService {
+
+  @inject forge vault: DataVault<Any>
+  @inject forge auth: Nova.Auth
+  @inject forge bus: Nova.Bus
+
+  @portal(endpoint: "sors-maxima.retentionsequence.get")
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: StandardRequestSchema)
+  manifest getAll(
+    ctx:    RequestContext,
+    filter: QueryFilter?
+  ): flow<Constellation<Any>> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge results = sync this.vault.query({
+      owner:  identity.userId,
+      filter: filter ?? QueryFilter.none(),
+      limit:  100
+    })
+
+    Nova.Metrics.pulse("sors-maxima.retentionsequenceservice.get", 1.0)
+    propagate results
+  }
+
+  @portal(endpoint: "sors-maxima.retentionsequence.create")
+  @audit
+  @shield(require: ["AUTHENTICATED"])
+  @validate(schema: CreateRequestSchema)
+  manifest create(
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+
+    forge entry = sync this.vault.store({
+      ...input,
+      id:        Nova.Crypto.uuid(),
+      ownerId:   identity.userId,
+      createdAt: Timestamp.now(),
+      status:    Status.ACTIVE
+    })
+
+    // Broadcast creation signal via IDB
+    Nova.Bus.emit("sors-maxima.retentionsequence.created", Signal {
+      topic:   "sors-maxima.retentionsequence.created",
+      payload: { entryId: entry.id, userId: identity.userId },
+      origin:  "sors-maxima",
+      priority: Priority.NORMAL
+    })
+
+    Nova.Metrics.pulse("sors-maxima.retentionsequenceservice.create", 1.0)
+    propagate entry
+  }
+
+  @portal(endpoint: "sors-maxima.retentionsequence.update")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest update(
+    id:    Text,
+    input: Any,
+    ctx:   RequestContext
+  ): flow<Any> {
+    forge identity = sync this.auth.verify(ctx)
+    forge existing = sync this.vault.get(id)
+    when (existing == nil) {
+      fault ResourceNotFound { resource: "RetentionSequence", id }
+    }
+
+    forge updated = sync this.vault.update(id, {
+      ...input,
+      updatedAt: Timestamp.now(),
+      updatedBy: identity.userId
+    })
+
+    propagate updated
+  }
+
+  @portal(endpoint: "sors-maxima.retentionsequence.delete")
+  @audit
+  @shield(require: ["AUTHENTICATED", "OWNS_RESOURCE"])
+  manifest dissolve(id: Text, ctx: RequestContext): flow<nil> {
+    forge identity = sync this.auth.verify(ctx)
+    sync this.vault.softDelete(id, identity.userId)
+    Nova.Metrics.pulse("sors-maxima.retentionsequenceservice.delete", 1.0)
+    propagate nil
+  }
+}
+
+
+seal {
+  service PredictionPipelineService
+  service SettlementService
+  service WagerGuardianService
+  service LiveSportsDataService
+  service NotificationService
+  service AnalyticsAgentService
+  service PrefetchSchedulerService
+  service RetentionSequenceService
+}

@@ -1,0 +1,88 @@
+// Sors Maxima/omniscript/main.omni
+// Platform Entry Point — The Predictive Dimension
+// © 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.
+// CONFIDENTIAL — Owner Eyes Only.
+
+draw { Nova } from "nova:std"
+draw { Signal, Status, Vibe, Emotion, Dimension } from "nova:std/types"
+draw { Platform } from "nova:std/platform"
+
+  draw { BettingIntelligenceUniverse } from "./universes/BettingIntelligence"
+  draw { LiveWageringUniverse } from "./universes/LiveWagering"
+  draw { PortfolioManagementUniverse } from "./universes/PortfolioManagement"
+
+  draw { QuantumFusionCoreEngine } from "./engines/QuantumFusionCoreEngine"
+  draw { MonteCarloEngine } from "./engines/MonteCarloEngine"
+  draw { CorrelationWeaveEngine } from "./engines/CorrelationWeaveEngine"
+  draw { SituationalFactorEngine } from "./engines/SituationalFactorEngine"
+
+  draw { PredictionPipelineService } from "./services/PredictionPipelineService"
+  draw { SettlementService } from "./services/SettlementService"
+  draw { WagerGuardianService } from "./services/WagerGuardianService"
+
+/// Platform manifest for Sors Maxima
+/// Dimension: The Predictive Dimension
+@platform(
+  id: "sors-maxima",
+  version: "1.0.0",
+  dimension: "The Predictive Dimension",
+  copyright: "© 2024–2026 Jeffrey W Williams LLC. All Rights Reserved."
+)
+manifest bootstrapPlatform(): flow<nil> {
+
+  Nova.Log.info("Bootstrapping Sors Maxima — The Predictive Dimension")
+
+  // ── Register all Intelligence Cores ──────────────────────────────────────
+  Nova.Engine.register(QuantumFusionCoreEngine)
+  Nova.Engine.register(MonteCarloEngine)
+  Nova.Engine.register(CorrelationWeaveEngine)
+  Nova.Engine.register(SituationalFactorEngine)
+
+  // ── Activate all Universes ────────────────────────────────────────────────
+  BettingIntelligenceUniverse.activate()
+  LiveWageringUniverse.activate()
+  PortfolioManagementUniverse.activate()
+
+  // ── Connect to Inter-Dimensional Bus ─────────────────────────────────────
+  sync Nova.Bus.connect(platformId: "sors-maxima")
+  Nova.Log.info("Sors Maxima connected to Inter-Dimensional Bus")
+
+  // ── Start Pulse Watch ─────────────────────────────────────────────────────
+  Nova.Metrics.startPulseWatch("sors-maxima")
+
+  Nova.Log.info("Sors Maxima fully Calibrated and Activated")
+}
+
+/// IDB Signal Handlers
+form SorsMaximaPlatform extends Platform {
+
+  @on_signal(topic: "sors-maxima.projection.complete")
+  manifest onComplete(signal: Signal): flow<nil> {
+    Nova.Log.info(`Signal received: ${signal.topic} from ${signal.origin}`)
+    sync dispatchComplete(signal)
+  }
+
+  @on_signal(topic: "sors-maxima.wager.placed")
+  manifest onPlaced(signal: Signal): flow<nil> {
+    Nova.Log.info(`Signal received: ${signal.topic} from ${signal.origin}`)
+    sync dispatchPlaced(signal)
+  }
+
+  manifest getStatus(): PlatformStatus {
+    propagate PlatformStatus {
+      platformId: "sors-maxima",
+      dimension: "The Predictive Dimension",
+      activeEngines: Nova.Engine.getActive().length,
+      vibe: Nova.Vibe.getPlatformVibe(),
+      status: Status.ACTIVE,
+      timestamp: Timestamp.now()
+    }
+  }
+}
+
+// ── Entrypoint ────────────────────────────────────────────────────────────────
+forge platform = SorsMaximaPlatform.getInstance()
+sync bootstrapPlatform()
+platform.activate()
+
+Nova.Log.info(`Sors Maxima — The Predictive Dimension — Signal Confirmed`)

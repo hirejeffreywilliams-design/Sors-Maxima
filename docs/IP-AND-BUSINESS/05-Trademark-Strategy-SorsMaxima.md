@@ -245,3 +245,43 @@ Trade dress protection arises from use in commerce. Document the distinctive vis
 *© 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.*
 *CONFIDENTIAL — Owner Eyes Only*
 *OmniDLOS Holdings Ecosystem*
+
+---
+
+## OMNISCRIPT-RELATED MARKS
+
+> © 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.
+
+### OmniScript and OmniDLOS Terminology as Trademark Assets
+
+The Sors Maxima Sports Betting Intelligence Platform trademark portfolio is enhanced by the OmniScript proprietary language system. The following OmniScript-related terms function as protectable marks within the OmniDLOS ecosystem:
+
+#### Tier 1 — Ecosystem-Level Marks (Parent: Jeffrey W. Williams LLC / OmniDLOS Holdings)
+
+| Mark | Classification | Nature | Priority Action |
+|---|---|---|---|
+| **OMNISCRIPT™** | Class 42 | Coined compound word — proprietary programming language name | File USPTO Class 42 immediately |
+| **OMNIVERSE™** | Class 42 | Coined compound — proprietary platform architecture designation | File USPTO Class 42 immediately |
+| **OMNIVAULT™** | Class 42 | Coined compound — proprietary package registry and data vault system | File USPTO Class 42 immediately |
+| **NOVA.BUS™** | Class 42 | Styled mark — Inter-Dimensional Bus signal system | Common law development, file at Series B |
+| **GUARDIAN LAYER™** | Class 42 | Descriptive-with-secondary-meaning — access control architecture | Common law, document as trade dress |
+| **NEXUS POINT™** | Class 42 | Coined compound — proprietary API designation | Common law development |
+| **OMNIDLOS™** | Class 42, 45 | Coined compound — ecosystem parent mark | File USPTO Classes 42 and 45 immediately |
+
+#### Tier 2 — Platform-Specific OmniScript Marks
+
+| Mark | Classification | Nature |
+|---|---|---|
+| **BETTINGPREDICTIONENGINE™** | Class 42 | Coined Engine name — the primary computation unit of the platform |
+| **SPORTSINTELLIGENCE UNIVERSE™** | Class 42 | Coined Universe name — the dimensional namespace of the platform |
+| **PULSE SCORE™** | Class 42 | Descriptive — OmniScript `Pulse`-typed scoring output |
+| **VIBE INTELLIGENCE™** | Class 42 | Coined compound — OmniScript `Vibe` type-driven emotional analytics |
+| **EMOTION DNA™** | Class 42 | Coined compound — OmniScript `Emotion` type-driven identity system |
+
+#### OmniScript Marks as Trade Dress
+
+The OmniScript language syntax itself — including the keywords `forge`, `weave`, `manifest`, `propagate`, `traverse`, `dimension`, `universe`, `engine`, and `pulse` — constitutes protectable trade dress as the distinctive visual and structural appearance of the OmniDLOS ecosystem's proprietary language. These keywords do not appear in any existing general-purpose or domain-specific language and are original coinages of Jeffrey W. Williams LLC.
+
+© 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.
+
+---

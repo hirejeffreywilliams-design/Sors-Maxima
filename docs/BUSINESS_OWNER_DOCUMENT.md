@@ -645,3 +645,70 @@ If the founder is unable to operate the platform for up to 30 days:
 *This document reflects the operational and business state of Sors Maxima as of March 2026.*
 *Update this document whenever material changes are made to pricing, tier structure, proprietary systems, or legal compliance requirements.*
 *For financial projections and long-range platform evaluation, see `docs/PLATFORM_EVALUATION_100YR.md`.*
+
+---
+
+## OMNISCRIPT: KEY TECHNOLOGY DIFFERENTIATOR
+
+> © 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.
+
+### Why OmniScript Makes Sors Maxima Sports Betting Intelligence Platform Investable Beyond the Product
+
+**OmniScript** is the proprietary domain-specific language (`.omni`) that powers Sors Maxima Sports Betting Intelligence Platform — and it is the single most important technology differentiator that separates this platform from every comparable investment opportunity in the market.
+
+#### The OmniScript Investment Thesis
+
+**1. Proprietary Language = Inimitable Moat**
+No competitor can fork, replicate, or reverse-engineer Sors Maxima Sports Betting Intelligence Platform's OmniScript implementation without accessing the OmniDLOS runtime, OmniVault registry, and Inter-Dimensional Bus. This is not a product advantage — it is a language-level architectural barrier. Comparable moats: Bloomberg Terminal's proprietary language, Salesforce Apex, and the early iOS Objective-C ecosystem.
+
+**2. 13-Platform Ecosystem Network Effects**
+Sors Maxima Sports Betting Intelligence Platform does not operate in isolation. Through OmniScript's `Nova.Bus`, it exchanges real-time typed Signals with all 12 other OmniDLOS platforms. An investor in Sors Maxima Sports Betting Intelligence Platform is investing into a 13-platform ecosystem with compounding network effects — not a standalone application.
+
+**3. IP Stack Depth**
+The OmniScript implementation adds three IP layers:
+- **Copyright:** All `.omni` source files are protected creative works
+- **Trade Secret:** Engine logic expressed in a proprietary language inaccessible to competitors
+- **Patent Support:** OmniScript code serves as technical disclosure for all filed patent applications
+
+**4. OmniVault Package Revenue**
+The platform's core engines — including `BettingPredictionEngine` — are registered in the OmniVault (OmniDLOS's proprietary package registry). These Engine packages can be licensed to other platforms, creating a B2B technology licensing revenue stream independent of the consumer product.
+
+#### OmniScript Technical Snapshot
+
+| Component | Detail |
+|---|---|
+| Language | OmniScript v1.0 (proprietary DSL, file extension `.omni`) |
+| Runtime | Compiles to optimized TypeScript — deploys on any Node.js environment |
+| Primary Engine | `BettingPredictionEngine` |
+| Supporting Engines | `MonteCarloSimulationEngine`, `OddsArbitrageEngine`, `LifeChangerTicketEngine` |
+| Universe | `SportsIntelligenceUniverse` (Dimension.TEMPORAL) |
+| Package Registry | OmniVault (exclusive to OmniDLOS ecosystem) |
+| Security | Guardian Layer — language-native tiered access control |
+| Cross-Platform Bus | `Nova.Bus` — typed Inter-Dimensional Signal system |
+
+#### OmniScript Sample (Live Platform Code)
+
+```omni
+// Sors Maxima — 46-Factor Betting Prediction Engine
+universe SportsIntelligenceUniverse {
+  dimension: Dimension.TEMPORAL
+  vibe: Vibe.PRECISION
+
+  forge FACTOR_COUNT: Integer = 46
+  forge SIMULATION_RUNS: Integer = 10_000
+  forge MIN_EV_THRESHOLD: Float = 3.5
+  forge CALIBRATION_WINDOW: Integer = 90  // days
+
+  engine BettingPredictionEngine implements Intelligent {
+    manifest flow analyzMatchup(homeTeam: Text, awayTeam: Text, market: Text): flow<Prediction> {
+      forge factors    = sync FactorModelService.computeAll(homeTeam, awayTeam, FACTOR_COUNT)
+      forge simulation = sync MonteCarloSimulationEngine.run(factors, runs: SIMULATION_RUNS)
+      forge odds       = sync OddsAggregationService.fetch(homeTeam, awayTeam, market)
+
+      forge ev: Float = simulation.expectedValue(odds)
+ ...
+```
+
+© 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.
+
+---

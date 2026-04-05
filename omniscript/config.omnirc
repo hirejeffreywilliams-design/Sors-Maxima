@@ -1,0 +1,89 @@
+# Sors Maxima/.omnirc
+# OmniScript Runtime Configuration — The Predictive Dimension
+# © 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.
+# CONFIDENTIAL — Owner Eyes Only.
+
+[platform]
+id          = "sors-maxima"
+name        = "Sors Maxima"
+version     = "1.0.0"
+dimension   = "The Predictive Dimension"
+runtime     = "omnidlos-runtime@4.0"
+language    = "omniscript@1.0"
+
+[build]
+target      = "omniscript"
+output      = "./dist"
+sourceMaps  = true
+strictMode  = true
+nullSafety  = true
+
+[omnivex]
+registry    = "omnivault"
+auth        = "${OMNIVAULT_TOKEN}"
+
+[vault]
+primary     = "SignalVault"
+connection  = "${DATABASE_URL}"
+encryption  = "AES-256-GCM"
+sealingKey  = "${VAULT_SEALING_KEY}"
+
+[idb]
+connection  = "${IDB_CONNECTION_STRING}"
+platformId  = "sors-maxima"
+topics      = ["sors-maxima.projection.complete", "sors-maxima.wager.placed", "sors-maxima.signal.high-confidence"]
+
+[shield]
+level       = "HIGH"
+protocols   = ["RBAC", "CSRF", "RATE_LIMIT", "MFA", "SIGNAL_CLOAKING"]
+keystoneVault = "${KEYSTONE_VAULT_URL}"
+
+[engines]
+autoCalibrate    = true
+calibrationCycle = "24h"
+active = [
+  "QuantumFusionCoreEngine",
+  "MonteCarloEngine",
+  "CorrelationWeaveEngine",
+  "SituationalFactorEngine",
+  "FatigueAnalysisEngine",
+  "EnvironmentalFactorEngine",
+  "OfficialTendencyEngine",
+  "CoachingMatchupEngine",
+  "MarketEfficiencyEngine",
+  "SharpSignalDetector",
+  "EarlySettlementEngine",
+  "ContinuousLearningOrchestrator",
+  "AutonomousAdminIntelligenceEngine",
+  "AcceleratedPatternEngine",
+  "PlatformIntelligenceEngine",
+  "QualityWatchdogEngine",
+  "BacktestEngine",
+  "InternationalSportsEngine",
+]
+
+[dimensional-planes]
+live    = "${LIVE_PLANE_URL}"
+shadow  = "${SHADOW_PLANE_URL}"
+forge   = "http://localhost:3000"
+
+[nova-ai]
+provider = "openai"
+model    = "gpt-4o"
+key      = "${AI_INTEGRATIONS_OPENAI_API_KEY}"
+baseURL  = "${AI_INTEGRATIONS_OPENAI_BASE_URL}"
+
+[pulse-watch]
+enabled  = true
+interval = "30s"
+targets  = ["engines", "services", "vault", "idb"]
+
+[chronicle-log]
+level    = "INFO"
+format   = "omnidlos-structured"
+output   = ["console", "omnivault:chronicle-store"]
+
+[copyright]
+owner   = "Jeffrey W Williams LLC"
+years   = "2024-2026"
+license = "PROPRIETARY"

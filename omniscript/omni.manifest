@@ -1,0 +1,81 @@
+{
+  "name":        "sors-maxima",
+  "displayName": "Sors Maxima",
+  "version":     "1.0.0",
+  "language":    "omniscript@1.0",
+  "platform":    "Sors-Maxima",
+  "runtime":     "omnidlos-runtime@4.0",
+
+  "description": "Where probability is elevated to precision, and intelligence is the only edge. 62+ proprietary engines in a Fusion Constellation deliver Quantum Projections on sporting events.",
+  "dimension":   "The Predictive Dimension",
+
+  "engines": [
+    "QuantumFusionCoreEngine",
+    "MonteCarloEngine",
+    "CorrelationWeaveEngine",
+    "SituationalFactorEngine",
+    "FatigueAnalysisEngine",
+    "EnvironmentalFactorEngine",
+    "OfficialTendencyEngine",
+    "CoachingMatchupEngine",
+    "MarketEfficiencyEngine",
+    "SharpSignalDetector",
+    "EarlySettlementEngine",
+    "ContinuousLearningOrchestrator",
+    "AutonomousAdminIntelligenceEngine",
+    "AcceleratedPatternEngine",
+    "PlatformIntelligenceEngine",
+    "QualityWatchdogEngine",
+    "BacktestEngine",
+    "InternationalSportsEngine"
+  ],
+
+  "universes": [
+    "BettingIntelligence",
+    "LiveWagering",
+    "PortfolioManagement"
+  ],
+
+  "services": [
+    "PredictionPipelineService",
+    "SettlementService",
+    "WagerGuardianService",
+    "LiveSportsDataService",
+    "NotificationService",
+    "AnalyticsAgentService",
+    "PrefetchSchedulerService",
+    "RetentionSequenceService"
+  ],
+
+  "idb": {
+    "topics": [
+      "sors-maxima.projection.complete",
+      "sors-maxima.wager.placed",
+      "sors-maxima.signal.high-confidence"
+    ]
+  },
+
+  "vault": "SignalVault",
+
+  "dependencies": {
+    "nova-auth":    "omnivault:nova-auth@2.1.0",
+    "nova-data":    "omnivault:nova-data@3.0.0",
+    "nova-metrics": "omnivault:nova-metrics@1.5.0",
+    "nova-ai":      "omnivault:nova-ai@4.0.0",
+    "nova-bus":     "omnivault:nova-bus@2.3.0",
+    "nova-vibe":    "omnivault:nova-vibe@1.2.0",
+    "nova-emotion": "omnivault:nova-emotion@1.2.0"
+  },
+
+  "shields": ["RBAC", "CSRF", "RATE_LIMIT", "MFA", "SIGNAL_CLOAKING"],
+
+  "omnivex": {
+    "constellation": "omnivex",
+    "platformIndex": 2,
+    "totalPlatforms": 13
+  },
+
+  "copyright":   "© 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.",
+  "license":     "PROPRIETARY",
+  "owner":       "Jeffrey W Williams LLC"
+}

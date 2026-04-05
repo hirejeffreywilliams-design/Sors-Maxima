@@ -168,3 +168,80 @@ If any shows `0 key(s) loaded`, that integration is running in degraded/demo mod
 - [ ] `BALLDONTLIE_API_KEY` configured
 - [ ] `RESEND_API_KEY` configured
 - [ ] `SENTRY_DSN` configured (optional but recommended)
+
+---
+
+## OMNISCRIPT INTEGRATION
+
+> © 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.
+
+### OmniScript Powers Sors Maxima Sports Betting Intelligence Platform
+
+**Sors Maxima Sports Betting Intelligence Platform** is implemented in **OmniScript** — the proprietary domain-specific language (file extension `.omni`) of the OmniDLOS / Omnivex ecosystem. OmniScript is the Cognitive Layer of the Four-Dimensional Operating System, designed to express computation, emotional intelligence, dimensional architecture, and temporal awareness in a single unified language.
+
+#### OmniScript Constructs in Sors Maxima Sports Betting Intelligence Platform
+
+The platform's core architecture is declared within the **`SportsIntelligenceUniverse`** — an OmniScript `universe` block operating at `Dimension.TEMPORAL`:
+
+- **Primary Engine:** `BettingPredictionEngine` — registered in the OmniVault package registry
+- **Supporting Engines:** `MonteCarloSimulationEngine`, `OddsArbitrageEngine`, `LifeChangerTicketEngine`
+- **Services:** `FactorModelService`, `OddsAggregationService`, `IntelligenceCardService`
+- **Nexus Points:** All external interfaces declared as typed OmniScript `portal` Nexus Points
+- **Vaults:** All persistent data archived via `Nova.Vault` with Guardian Layer protection
+- **Cross-Dimensional Bus:** `Nova.Bus` enables real-time Signal exchange with all 13 OmniDLOS platforms
+
+#### OmniScript Code Sample
+
+```omni
+// Sors Maxima — 46-Factor Betting Prediction Engine
+universe SportsIntelligenceUniverse {
+  dimension: Dimension.TEMPORAL
+  vibe: Vibe.PRECISION
+
+  forge FACTOR_COUNT: Integer = 46
+  forge SIMULATION_RUNS: Integer = 10_000
+  forge MIN_EV_THRESHOLD: Float = 3.5
+  forge CALIBRATION_WINDOW: Integer = 90  // days
+
+  engine BettingPredictionEngine implements Intelligent {
+    manifest flow analyzMatchup(homeTeam: Text, awayTeam: Text, market: Text): flow<Prediction> {
+      forge factors    = sync FactorModelService.computeAll(homeTeam, awayTeam, FACTOR_COUNT)
+      forge simulation = sync MonteCarloSimulationEngine.run(factors, runs: SIMULATION_RUNS)
+      forge odds       = sync OddsAggregationService.fetch(homeTeam, awayTeam, market)
+
+      forge ev: Float = simulation.expectedValue(odds)
+      forge confidence: Probability = simulation.confidenceInterval(0.95)
+
+      when (ev >= MIN_EV_THRESHOLD) {
+        Nova.Bus.emit("pick.high-ev", { matchup: `${homeTeam} vs ${awayTeam}`, ev, confidence })
+      }
+
+      propagate Prediction { factors, simulation, odds, ev, confidence }
+    }
+
+    manifest flow generateLifeChangerTicket(date: Chronicle): flow<ParlayTicket> {
+      forge picks = sync BettingPredictionEngine.getDailyBestPicks(date, minOdds: 1000)
+      forge ticket = sync LifeChangerTicketEngine.compose(picks)
+      Nova.Vault.archive("life-changer-ticket", ticket)
+      propagate ticket
+    }
+  }
+}
+```
+
+#### OmniDLOS Terminology Reference
+
+| OmniDLOS Term | Meaning in Sors Maxima Sports Betting Intelligence Platform |
+|---|---|
+| **Nexus Point** | Any API or integration interface declared in OmniScript `portal` syntax |
+| **Vault** | The encrypted, immutable data repository storing all platform state |
+| **Guardian Layer** | The `@Guardian(level: N)` access control system protecting sensitive Engine operations |
+| **Pulse** | The real-time scoring type used for all algorithmic outputs |
+| **Signal** | A typed event propagated via `Nova.Bus` to the Inter-Dimensional Bus |
+| **Chronicle** | The OmniScript temporal type — dates with legacy and historical awareness |
+| **Constellation** | The OmniScript collection type — dimensional arrays with typed membership |
+| **Universe** | The `SportsIntelligenceUniverse` namespace — the dimensional scope of the platform |
+
+© 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.
+
+---

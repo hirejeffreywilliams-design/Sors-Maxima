@@ -252,6 +252,100 @@ Administrative dashboard at `/admin/pipeline` shows real-time provider status. A
 
 ---
 
+---
+
+## OMNISCRIPT IMPLEMENTATION
+
+> © 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.
+
+### How the Patented Invention Is Expressed in OmniScript
+
+The patented invention — **46-factor AI sports prediction model with Monte Carlo simulation and adaptive self-calibration** — is natively expressed in **OmniScript** (file extension `.omni`), the proprietary domain-specific language of the OmniDLOS / Omnivex ecosystem. OmniScript is the Cognitive Layer through which the Four-Dimensional Operating System declares, registers, and composes all computation units (Engines), communication interfaces (Nexus Points and Portals), and data repositories (Vaults).
+
+#### OmniScript Architecture for Sors Maxima Sports Betting Intelligence Platform
+
+The invention is implemented within the **`SportsIntelligenceUniverse`** — an OmniScript `universe` block that defines the dimensional scope, emotional vibe, and computational topology of the platform:
+
+- **Primary Engine:** `BettingPredictionEngine` — the core computation unit implementing the patented algorithm
+- **Supporting Engines:** `MonteCarloSimulationEngine`, `OddsArbitrageEngine`, `LifeChangerTicketEngine`
+- **Services:** `FactorModelService`, `OddsAggregationService`, `IntelligenceCardService`
+- **Dimensional Scope:** `Dimension.TEMPORAL`
+- **Emotional Vibe:** `Vibe.PRECISION`
+- **Nexus Points (APIs):** Exposed via OmniScript `portal` declarations on each Engine
+- **Data Vaults:** All persistent state archived via `Nova.Vault` with Guardian Layer access control
+- **Cross-Platform Bus:** All inter-engine signals transmitted via `Nova.Bus` (the OmniDLOS Inter-Dimensional Bus)
+
+#### Patentable OmniScript Code Sample
+
+The following `.omni` source file demonstrates the patented concepts in OmniScript:
+
+```omni
+// Sors Maxima — 46-Factor Betting Prediction Engine
+universe SportsIntelligenceUniverse {
+  dimension: Dimension.TEMPORAL
+  vibe: Vibe.PRECISION
+
+  forge FACTOR_COUNT: Integer = 46
+  forge SIMULATION_RUNS: Integer = 10_000
+  forge MIN_EV_THRESHOLD: Float = 3.5
+  forge CALIBRATION_WINDOW: Integer = 90  // days
+
+  engine BettingPredictionEngine implements Intelligent {
+    manifest flow analyzMatchup(homeTeam: Text, awayTeam: Text, market: Text): flow<Prediction> {
+      forge factors    = sync FactorModelService.computeAll(homeTeam, awayTeam, FACTOR_COUNT)
+      forge simulation = sync MonteCarloSimulationEngine.run(factors, runs: SIMULATION_RUNS)
+      forge odds       = sync OddsAggregationService.fetch(homeTeam, awayTeam, market)
+
+      forge ev: Float = simulation.expectedValue(odds)
+      forge confidence: Probability = simulation.confidenceInterval(0.95)
+
+      when (ev >= MIN_EV_THRESHOLD) {
+        Nova.Bus.emit("pick.high-ev", { matchup: `${homeTeam} vs ${awayTeam}`, ev, confidence })
+      }
+
+      propagate Prediction { factors, simulation, odds, ev, confidence }
+    }
+
+    manifest flow generateLifeChangerTicket(date: Chronicle): flow<ParlayTicket> {
+      forge picks = sync BettingPredictionEngine.getDailyBestPicks(date, minOdds: 1000)
+      forge ticket = sync LifeChangerTicketEngine.compose(picks)
+      Nova.Vault.archive("life-changer-ticket", ticket)
+      propagate ticket
+    }
+  }
+}
+```
+
+#### OmniScript Constructs Protecting the Patented Innovation
+
+| OmniScript Construct | Patent Relevance |
+|---|---|
+| `engine BettingPredictionEngine` | Declares the core patented computation unit as a registered OmniScript Engine |
+| `universe SportsIntelligenceUniverse` | Establishes the dimensional and emotional boundary of the patented system |
+| `manifest flow` | Expresses each patented method as a typed async OmniScript function |
+| `Nova.Vault.archive()` | Archives all patented output to the OmniDLOS Vault (encrypted, immutable ledger) |
+| `Nova.Bus.emit()` | Cross-dimensional signal propagation — the Inter-Dimensional Bus nexus |
+| `@Guardian(level: N)` | Guardian Layer decorator enforcing OmniDLOS access control on patented services |
+| `forge` / `weave` | Immutable/mutable binding of patented constants and working variables |
+| `Probability` type | Native OmniScript probability literal enforcing 0–100% range at compile time |
+
+#### OmniDLOS Terminology Reference
+
+Within the OmniDLOS ecosystem, the components of this invention carry the following proprietary names:
+
+- **Engines** → The computation units (`BettingPredictionEngine`, etc.) are registered OmniScript Engines in the OmniVault package registry
+- **Nexus Points** → Each `portal` declaration is a Nexus Point — the atom of inter-system dialogue in OmniDLOS
+- **Vaults** → All persistent data is archived in Nova Vault repositories with Guardian Layer access control
+- **Guardian Layers** → Tiered access control system (levels 1–10) protecting all sensitive Engine operations
+- **Pulse** → The OmniScript native float type used for all real-time scoring and probabilistic values
+- **Chronicle** → The OmniScript temporal type representing dates with cross-dimensional awareness
+- **Signal** → The typed event object propagated across the Inter-Dimensional Bus
+- **Constellation** → The OmniScript collection type (array equivalent) for dimensional data sets
+
+© 2024–2026 Jeffrey W Williams LLC. All Rights Reserved.
+
+---
+
 ## CLAIMS
 
 What is claimed is:
