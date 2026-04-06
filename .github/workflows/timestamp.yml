@@ -46,11 +46,8 @@ jobs:
 
       - name: Create source code archive
         run: |
-          tar -czf repo-snapshot.tar.gz \
-            --exclude='.git' \
-            --exclude='node_modules' \
-            --exclude='package-lock.json' \
-            .
+          # Create deterministic snapshot from git index (avoids tar failing when files change during read)
+git archive --format=tar.gz --output=repo-snapshot.tar.gz HEAD
 
       - name: Generate SHA-256 hashes
         run: |
