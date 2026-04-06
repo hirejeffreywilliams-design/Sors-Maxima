@@ -1,9 +1,9 @@
 # PLATFORM VALUATION REPORT
 
 > **OMNIVEX ECOSYSTEM UPDATE — April 2026**
-> This platform is part of the OmniDLOS/Omnivex ecosystem comprising 13 platforms,
-> 62 patentable inventions, 117 patent documents (47 PPAs + 50 NPAs + 20 Design Patents),
-> 186+ trademarks, and 854,754+ lines of code. Combined ecosystem valuation: $380M-$775M.
+> This platform is part of the OmniDLOS/Omnivex ecosystem comprising 20 repositories,
+> 63 novel concepts, 1,171+ patent claims (157 PPAs + 85 NPAs + 103 Prior Art + 26 FTOs),
+> 200+ trademarks, and 983,617+ lines of source code. Combined ecosystem valuation: $155M–$292M–$593M.
 
 
 **Title:** Valuation Report — Sors Maxima Sports Button (46-Factor Quantum Fusion Engine)
@@ -23,10 +23,20 @@ This valuation report is prepared for internal IP documentation and investor com
 
 ---
 
+## PLATFORM METRICS (Verified April 6, 2026)
+
+| Metric | Value |
+|---|---|
+| **Source Lines** | **230,066** |
+| **Source Files** | **589** |
+| **Database Tables** | **28** |
+
+---
+
 ## EXECUTIVE SUMMARY
 
 **Platform:** Sors Maxima — Sports Button (46-Factor Quantum Fusion Engine)
-**Stage:** Working production platform — 230,747 lines of code
+**Stage:** Working production platform — 230,066 lines of code
 **Performance:** 55.9% win rate across 987+ settled picks (break-even: 52.4%)
 **IP:** Patent Pending (PPA filed April 4, 2026), Trademarks filed
 
@@ -40,7 +50,7 @@ This valuation report is prepared for internal IP documentation and investor com
 | **Concluded Fair Market Value Range** | **$18M – $50M** |
 | **Midpoint Estimate** | **$30M** |
 
-The $30M midpoint reflects the platform's compelling combination of a massive addressable market, a documented performance track record (55.9% win rate), a proprietary 46-factor AI architecture with patent protection, and a fully deployed production codebase of 230,747 lines.
+The $30M midpoint reflects the platform's compelling combination of a massive addressable market, a documented performance track record (55.9% win rate), a proprietary 46-factor AI architecture with patent protection, and a fully deployed production codebase of 230,066 lines.
 
 ---
 
@@ -72,7 +82,7 @@ For pre-revenue sports AI platforms with strong IP and documented performance da
 
 **Upward Factors Supporting High End of Range ($40M–$50M):**
 1. **Documented win rate:** 55.9% across 987+ picks is verifiable, credible proof of concept that most competitors cannot match
-2. **Platform scale:** 230,747 lines of production code across 60+ engine modules — a substantial engineering asset
+2. **Platform scale:** 230,066 lines of production code across 60+ engine modules — a substantial engineering asset
 3. **Market size:** $7.5B sports prediction intelligence market growing at 22% CAGR
 4. **IP protection:** Patent pending for the Quantum Fusion Engine architecture; trademarks filed
 5. **Technology breadth:** 8 sports, 6 international soccer leagues, 46 factors — comprehensive coverage
@@ -118,7 +128,7 @@ For pre-revenue sports AI platforms with strong IP and documented performance da
 
 | Asset | Estimated Value |
 |---|---|
-| Production codebase (230,747 LOC) | $2.5M – $4.5M (at $11–$20/LOC for AI sports platform) |
+| Production codebase (230,066 LOC) | $2.5M – $4.5M (at $11–$20/LOC for AI sports platform) |
 | Quantum Fusion Engine design and architecture | $1M – $2M |
 | 46-factor data model and weighting system | $500K – $1M |
 | Monte Carlo simulation infrastructure | $300K – $600K |
@@ -159,7 +169,7 @@ Every settled pick improves the Quantum Fusion Engine. At 987+ picks, the model 
 
 ### Driver 3: The Market Timing
 
-Post-PASPA, the US legal sports betting market is in the fastest growth phase of its history. Platforms that establish brand recognition and user loyalty during this growth phase will capture disproportionate long-term market share. Sors Maxima is deploying its 230,747-line production platform at the optimal moment in market development.
+Post-PASPA, the US legal sports betting market is in the fastest growth phase of its history. Platforms that establish brand recognition and user loyalty during this growth phase will capture disproportionate long-term market share. Sors Maxima is deploying its 230,066-line production platform at the optimal moment in market development.
 
 ### Driver 4: The Sports Betting Media Acquisition Premium
 
@@ -228,7 +238,7 @@ OmniScript source files (`.omni`) represent a distinct asset class beyond conven
 
 No comparable acquisition target operates on OmniScript. Every comparable platform in the market uses commodity technology stacks (Node.js, Python, React Native). An acquirer of Sors Maxima Sports Betting Intelligence Platform acquires:
 
-- Exclusive access to a proprietary language ecosystem with 13 integrated platforms
+- Exclusive access to a proprietary language ecosystem with 20 integrated platforms
 - An Inter-Dimensional Bus (`Nova.Bus`) providing real-time cross-platform signal exchange with the entire OmniDLOS ecosystem
 - All OmniVault-registered Engine packages — proprietary algorithmic assets with no public equivalent
 - The right to deploy the OmniScript runtime (`omnibuild`, `omni-shell`) within the acquired platform
