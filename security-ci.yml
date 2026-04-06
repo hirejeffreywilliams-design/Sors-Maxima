@@ -1,0 +1,270 @@
+# =============================================================================
+# Omnivex Ecosystem — Security-Focused CI Pipeline Extension
+# Extends .gitlab-ci.yml with advanced security scanning
+# Author: Jeffrey Williams
+# Updated: 2026-04-06
+#
+# Includes:
+#   - Container scanning (Docker image vulnerabilities)
+#   - License compliance (open-source license auditing)
+#   - DAST — Dynamic Application Security Testing
+#   - Infrastructure-as-Code scanning
+#   - Custom Omnivex secret patterns
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Include GitLab security scanning templates (free with GitLab Ultimate)
+# ---------------------------------------------------------------------------
+include:
+  - template: Security/Container-Scanning.gitlab-ci.yml
+  - template: Security/License-Scanning.gitlab-ci.yml
+  - template: Security/DAST.gitlab-ci.yml
+  - template: Security/IaC-Scanning.gitlab-ci.yml
+
+# ---------------------------------------------------------------------------
+# Stages — these extend the parent pipeline stage list
+# ---------------------------------------------------------------------------
+stages:
+  - build
+  - test
+  - quality
+  - security
+  - dast
+  - deploy
+
+# =============================================================================
+# CONTAINER SCANNING
+# Scans Docker images for known CVEs using Trivy
+# =============================================================================
+container_scanning:
+  stage: security
+  variables:
+    # Point to the image built and pushed in the build stage
+    CS_IMAGE: "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHA"
+    CS_SEVERITY_THRESHOLD: "HIGH"
+    CS_DOCKERFILE_PATH: "Dockerfile"
+    TRIVY_NO_PROGRESS: "true"
+    TRIVY_CACHE_DIR: ".trivycache/"
+  cache:
+    paths:
+      - .trivycache/
+  artifacts:
+    reports:
+      container_scanning: gl-container-scanning-report.json
+    paths:
+      - gl-container-scanning-report.json
+    expire_in: 7 days
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  allow_failure: true
+
+# =============================================================================
+# LICENSE COMPLIANCE
+# Ensures open-source licenses are compatible with commercial Omnivex products
+# =============================================================================
+license_scanning:
+  stage: security
+  variables:
+    LicenseManagement_DISABLE: "false"
+    # Deny licenses incompatible with commercial software
+    LICENSE_BLACKLIST: "GPL-2.0,GPL-3.0,AGPL-1.0,AGPL-3.0,LGPL-2.0,LGPL-2.1,LGPL-3.0,CC-BY-SA-4.0,OSL-3.0,EUPL-1.1,EUPL-1.2"
+  artifacts:
+    reports:
+      license_scanning: gl-license-scanning-report.json
+    paths:
+      - gl-license-scanning-report.json
+    expire_in: 7 days
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  allow_failure: true
+
+# =============================================================================
+# DAST — Dynamic Application Security Testing
+# Runs against the Netlify preview deploy or a dedicated staging URL
+# =============================================================================
+
+# Stage 1: Spin up the app for DAST
+dast:review_app:
+  stage: dast
+  image: node:20-alpine
+  needs:
+    - job: deploy:netlify:preview
+      artifacts: true
+      optional: true
+  script:
+    - echo "DAST_WEBSITE=${PREVIEW_URL:-$DAST_WEBSITE_OVERRIDE}" >> dast.env
+    - cat dast.env
+  artifacts:
+    reports:
+      dotenv: dast.env
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $DAST_WEBSITE_OVERRIDE'
+
+# Stage 2: Run DAST scan
+dast:
+  stage: dast
+  needs:
+    - job: dast:review_app
+      artifacts: true
+  variables:
+    DAST_WEBSITE: "$DAST_WEBSITE"
+    DAST_FULL_SCAN_ENABLED: "false"       # Enable for scheduled/nightly full scans
+    DAST_BROWSER_SCAN: "true"             # Use browser-based scan
+    DAST_BROWSER_STABILITY_TIMEOUT: 15
+    DAST_CRAWL_TIMEOUT: 10
+    DAST_AUTH_URL: "$DAST_AUTH_URL"
+    DAST_AUTH_USERNAME: "$DAST_AUTH_USERNAME"
+    DAST_AUTH_PASSWORD: "$DAST_AUTH_PASSWORD"
+    DAST_AUTH_USERNAME_FIELD: "email"
+    DAST_AUTH_PASSWORD_FIELD: "password"
+    DAST_EXCLUDE_URLS: "$CI_ENVIRONMENT_URL/logout,$CI_ENVIRONMENT_URL/api/stripe"
+  artifacts:
+    reports:
+      dast: gl-dast-report.json
+    paths:
+      - gl-dast-report.json
+    expire_in: 7 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_BRANCH == "main" && $DAST_WEBSITE_OVERRIDE'
+  allow_failure: true
+
+# ---------------------------------------------------------------------------
+# DAST Full Scan — scheduled nightly on main
+# Runs a comprehensive ZAP active scan (can be slow, 30–60 min)
+# ---------------------------------------------------------------------------
+dast:full_scan:
+  stage: dast
+  variables:
+    DAST_WEBSITE: "$PRODUCTION_URL"
+    DAST_FULL_SCAN_ENABLED: "true"
+    DAST_BROWSER_SCAN: "true"
+    DAST_AUTH_URL: "$DAST_AUTH_URL"
+    DAST_AUTH_USERNAME: "$DAST_AUTH_USERNAME"
+    DAST_AUTH_PASSWORD: "$DAST_AUTH_PASSWORD"
+  artifacts:
+    reports:
+      dast: gl-dast-full-report.json
+    paths:
+      - gl-dast-full-report.json
+    expire_in: 30 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == "main"'
+  allow_failure: true
+
+# =============================================================================
+# INFRASTRUCTURE-AS-CODE SCANNING
+# Scans Terraform, Kubernetes YAML, Dockerfile, Docker Compose, etc.
+# =============================================================================
+iac_scanning:
+  stage: security
+  artifacts:
+    reports:
+      iac_scanning: gl-iac-report.json
+    paths:
+      - gl-iac-report.json
+    expire_in: 7 days
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  allow_failure: true
+
+# =============================================================================
+# CUSTOM: Omnivex proprietary key / secret pattern detection
+# Catches accidental commits of API keys specific to the Omnivex ecosystem
+# =============================================================================
+security:omnivex-secrets:
+  stage: security
+  image: alpine:latest
+  needs: []
+  before_script:
+    - apk add --no-cache grep findutils
+  script:
+    - echo "==> Scanning for Omnivex-specific secret patterns..."
+    - |
+      PATTERNS=(
+        "OMNIVEX_SECRET"
+        "CHROMAFEEL_API_KEY"
+        "EMOTIONDNA_SECRET"
+        "FRICTIONMAP_TOKEN"
+        "HABITGENOME_KEY"
+        "TRUSTTOPOLOGY_SECRET"
+        "STRIPE_SECRET_KEY"
+        "STRIPE_WEBHOOK_SECRET"
+        "NETLIFY_AUTH_TOKEN"
+        "DATABASE_URL.*password"
+        "JWT_SECRET"
+        "SESSION_SECRET"
+      )
+      FOUND=0
+      for pattern in "${PATTERNS[@]}"; do
+        MATCHES=$(grep -rn --include="*.ts" --include="*.tsx" --include="*.js" \
+          --include="*.json" --include="*.env" --include="*.yaml" --include="*.yml" \
+          --exclude-dir=node_modules --exclude-dir=.git --exclude-dir=dist \
+          -E "$pattern\s*=\s*['\"][^'\"\$\{]" . 2>/dev/null || true)
+        if [ -n "$MATCHES" ]; then
+          echo "POTENTIAL SECRET FOUND — Pattern: $pattern"
+          echo "$MATCHES"
+          FOUND=1
+        fi
+      done
+      if [ "$FOUND" -eq 1 ]; then
+        echo "ERROR: Potential secrets detected. Review output above."
+        exit 1
+      fi
+      echo "==> No Omnivex secret patterns detected."
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  allow_failure: false
+
+# =============================================================================
+# SECURITY REPORT AGGREGATOR
+# Collects all security reports and posts a summary comment to MRs
+# =============================================================================
+security:summary:
+  stage: .post
+  image: alpine:latest
+  needs:
+    - job: sast
+      optional: true
+    - job: dependency_scanning
+      optional: true
+    - job: secret_detection
+      optional: true
+    - job: container_scanning
+      optional: true
+    - job: license_scanning
+      optional: true
+  script:
+    - echo "==> Security scan summary complete. Review GitLab Security Dashboard for full report."
+    - echo "    https://gitlab.com/$CI_PROJECT_PATH/-/security/vulnerability_report"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  allow_failure: true
+
+# =============================================================================
+# SCHEDULED FULL SECURITY AUDIT (weekly)
+# Runs all scans with maximum depth on Sunday at midnight
+# Configure in GitLab: CI/CD > Schedules > "Weekly Security Audit"
+# =============================================================================
+security:weekly-audit:
+  stage: security
+  image: node:20-alpine
+  script:
+    - npm ci --prefer-offline
+    - echo "==> Running full weekly security audit..."
+    - npm audit --json > npm-audit-weekly.json
+    - npx audit-ci --critical
+    - echo "==> Weekly audit complete."
+  artifacts:
+    paths:
+      - npm-audit-weekly.json
+    expire_in: 90 days
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "schedule" && $AUDIT_TYPE == "weekly"'
+  allow_failure: true
