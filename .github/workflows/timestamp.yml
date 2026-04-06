@@ -9,7 +9,7 @@ on:
     - cron: '0 0 1 * *'  # Monthly on the 1st at midnight UTC
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   timestamp:
