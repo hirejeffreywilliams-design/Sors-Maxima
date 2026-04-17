@@ -185,3 +185,7 @@ omnicheck ./omniscript/
 OmniDLOS, OmniScript, Omnivex, Sors Maxima, ChromaFeel, EmotionDNA, QuantumMood, VibeVerse, Momentum Exchange, Dimensional Citizen, Sovereign Identity, and all associated terminology, names, and concepts are proprietary intellectual property of **Jeffrey W Williams LLC**. Unauthorized reproduction or distribution is strictly prohibited.
 
 **PROPRIETARY — All Rights Reserved.**
+
+## Usage
+
+Clone the repository and follow the setup instructions in the project documentation.
