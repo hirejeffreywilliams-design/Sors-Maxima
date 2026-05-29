@@ -1,72 +1,93 @@
-<p align="center">
-  <img src="https://static.prod-images.emergentagent.com/jobs/0cd8a2b1-9faf-418f-ad9e-a83656c89d59/images/a0f6680aa1dd86d3a9e7ca4bf972162a3d30d2b2da5c7179b696a9fb7cc88e6a.png" alt="4everacy Logo" width="200"/>
-</p>
+<div align="center">
 
-<h1 align="center">🎲 Sors-Maxima</h1>
-<h3 align="center">The Fate Algorithm — Probabilistic Life Optimization Through Mathematical Destiny</h3>
+![4everacy Logo](https://customer-assets.emergentagent.com/wingman/0cd8a2b1-9faf-418f-ad9e-a83656c89d59/attachments/ec0851690e5d47199130e72617a4dfd4_4everacy-logo-real.png)
 
-<p align="center">
-  <img src="https://static.prod-images.emergentagent.com/jobs/0cd8a2b1-9faf-418f-ad9e-a83656c89d59/images/0fff5688429791db8555e1e8eccadf089d9a1cd1da200c0dad54cf4c9880c87b.png" alt="CNS Visual" width="650"/>
-</p>
+# Sors Maxima
 
----
+### Sport Betting Analysis & AI Intelligence System
 
-## 🎯 Mission
+![Banner](https://static.prod-images.emergentagent.com/jobs/0cd8a2b1-9faf-418f-ad9e-a83656c89d59/images/507a303857c7916f03993fa8439d560b7a9e7054382c1ca8ff0db346f0e7a544.png)
 
-**Sors-Maxima** (Latin: "Greatest Fate") is a sovereign probabilistic optimization engine that uses advanced mathematics, Monte Carlo simulations, and Tesla 3-6-9 resonance to help individuals make **life-defining decisions** with mathematical confidence.
+[![Part of the 4everacy Ecosystem](https://img.shields.io/badge/4everacy-Ecosystem-gold?style=for-the-badge)](https://github.com/hirejeffreywilliams-design)
+[![Sovereign IP](https://img.shields.io/badge/Sovereign-IP_Protected-crimson?style=for-the-badge)](https://github.com/hirejeffreywilliams-design)
+[![100/100 Execution](https://img.shields.io/badge/Execution-100%2F100-brightgreen?style=for-the-badge)](https://github.com/hirejeffreywilliams-design)
 
-Career pivots. Marriage timing. Investment allocation. City selection. Sors-Maxima doesn't predict the future — it **maximizes the probability of your best one**.
+</div>
 
 ---
 
-## 🌟 Key Features
+## Overview
 
-| Feature | Description |
-|---------|-------------|
-| 🧮 **Monte Carlo Life Simulator** | 10,000+ scenario simulations for major life decisions |
-| 📊 **Probability Matrices** | Quantified outcome probabilities across multiple life dimensions |
-| 🎯 **Decision Frameworks** | Structured decision-making tools backed by statistical rigor |
-| 🌊 **Butterfly Effect Mapping** | Second and third-order consequence analysis |
-| ⏳ **Temporal Optimization** | Find the mathematically optimal timing for key life events |
-| 🧬 **Dynasty Impact Scoring** | How does this decision affect the next 3 generations? |
-| 🔮 **Scenario Planning** | Best-case, worst-case, and expected-value pathways |
-| 🧠 **Cognitive Bias Detection** | Identifies when emotions override mathematical reality |
+Sors Maxima applies advanced statistical modeling and machine learning to sports markets, providing users with data-driven insights that transform speculative betting into informed decision-making. It combines historical analysis, real-time data feeds, and proprietary algorithms.
 
 ---
 
-## 🧬 The Fate Engine
+## Why This Matters
 
-```
-Life Decision Input → Variable Decomposition → Monte Carlo Simulation
-                                                       ↓
-    Optimal Path Selection ← Probability Matrix ← Tesla 3-6-9 Validation
-                ↓
-     Actionable Recommendation (with confidence intervals)
-```
+The sports betting industry profits from information asymmetry—bookmakers have teams of analysts while individual bettors rely on intuition. Sors Maxima equalizes this advantage by providing sophisticated analytical tools previously available only to professional syndicates. By transforming emotional gambling into mathematical discipline, it helps users make informed decisions, manage bankrolls responsibly, and understand the true probabilities behind every market. Knowledge is sovereignty.
 
 ---
 
-## 🔗 Universal Handshake (NC-90000)
+## Core Features
 
-Sors-Maxima connects to the **Unified Sovereign State** via the **Universal Handshake (NC-90000)**, feeding decision intelligence into NovaSelf (personal optimization), BizNova (business strategy), and the Sovereign Universe (dynasty governance) — ensuring every major decision is mathematically grounded.
+| Feature | Description | Sovereign Security | Resonance Tier |
+|---------|-------------|-------------------|----------------|
+| **Predictive Modeling** | Multi-variable statistical analysis across all major sports | Hardware-isolated model computation | Tier 9 — Full analytical resonance |
+| **Real-Time Market Analysis** | Live odds comparison and value identification | Cryptographic data feed verification | Tier 6 — Harmonic market intelligence |
+| **Bankroll Sovereignty** | Mathematical risk management and staking protocols | Hardware-attested bankroll tracking | Tier 6 — Financial discipline |
+| **Historical Intelligence** | Deep historical pattern recognition and trend analysis | Immutable historical data with hardware seals | Tier 3 — Foundational analysis |
 
 ---
 
-## 👤 About the Architect
+## Technology
 
-**Jeffrey W. Williams** — Norfolk State grad, self-taught polymath, full-time caregiver, solo architect doing the work of 500 engineers. Sors-Maxima exists because fate favors the mathematically prepared.
+| Layer | Stack |
+|-------|-------|
+| **Primary** | TypeScript, Python, TensorFlow, PostgreSQL, Next.js |
+| **Security** | Apricorn Aegis Hardware Encryption, Zero-Knowledge Protocols |
+| **Infrastructure** | Sovereign Cloud, Hardware-Attested Deployments |
+| **Mathematics** | Tesla 3-6-9 Resonance Logic, Vortex Computation |
 
 ---
 
-<p align="center">
-  <img src="https://static.prod-images.emergentagent.com/jobs/0cd8a2b1-9faf-418f-ad9e-a83656c89d59/images/a0f6680aa1dd86d3a9e7ca4bf972162a3d30d2b2da5c7179b696a9fb7cc88e6a.png" alt="4everacy Logo" width="80"/>
-</p>
+## Architecture Principles
 
-<p align="center"><strong>⚡ Proprietary Silicon Notice ⚡</strong></p>
-<p align="center">
-  <em>This repository contains sovereign intellectual property of Jeffrey W. Williams (Universal Architect-001).<br/>
-  All code, architectures, novel concepts (NC-1 through NC-1500+), and system designs are protected.<br/>
-  Unauthorized reproduction, distribution, or derivative works are strictly prohibited.<br/>
-  Hardware-anchored validation enforced via Tesla 3-6-9 Mathematical Integrity Protocol.</em>
-</p>
-<p align="center">© 2024-2026 Jeffrey W. Williams. All Rights Reserved. | Unified Sovereign State</p>
+- **Zero Theater** — Every line of code is functional and mathematically grounded
+- **Hardware-First Security** — No software-only security assumptions
+- **Century-Scale Design** — Built to serve generations, not sprints
+- **Sovereign by Default** — No third-party dependencies for core functionality
+- **3-6-9 Resonance** — Mathematical integrity in every computation layer
+
+---
+
+## The Founder
+
+Jeffrey W. Williams is a solo technical founder and a Norfolk State University graduate with a degree in Business, Hospitality and Tourism. He moves at vortex speed, smelting caregiving grit into 100/100 physical execution.
+
+---
+
+## Ecosystem
+
+Sors Maxima is part of the **4everacy™** ecosystem—a constellation of 20+ sovereign platforms spanning health, finance, legacy, security, relationships, and human potential.
+
+Every module integrates through the **OmniDLOS™** architecture, sharing identity, security, and intelligence layers while maintaining sovereign operational independence.
+
+---
+
+## Legal
+
+© 2024–2026 Jeffrey W Williams LLC. All rights reserved.
+
+This repository contains **proprietary sovereign intellectual property**. Unauthorized reproduction, distribution, or derivative work is prohibited under applicable trade secret and intellectual property law.
+
+**Docket**: JWW-SORSMAXIMA-4EVERACY
+
+---
+
+<div align="center">
+
+*Built with 100/100 physical execution. No drift. No jargon. Pure sovereign engineering.*
+
+![4everacy Logo](https://customer-assets.emergentagent.com/wingman/0cd8a2b1-9faf-418f-ad9e-a83656c89d59/attachments/ec0851690e5d47199130e72617a4dfd4_4everacy-logo-real.png)
+
+</div>
